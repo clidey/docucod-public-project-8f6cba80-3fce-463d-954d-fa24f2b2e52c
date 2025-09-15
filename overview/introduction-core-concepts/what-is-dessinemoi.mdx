@@ -1,0 +1,184 @@
+---
+title: "What is Dessine-moi?"
+description: "An overview of the Dessine-moi library, its rationale, and its role in simplifying the creation of Python objects from nested data structures. Includes product value, core philosophy, and typical user scenarios."
+---
+
+# What is Dessine-moi?
+
+Welcome to an introduction to *Dessine-moi*, a Python library designed to simplify and streamline the creation of Python objects from nested data structures. Whether you're working with complex JSON documents or deeply nested dictionaries, *Dessine-moi* offers an elegant, flexible factory-based solution to bring dynamic object trees to life.
+
+---
+
+## Why Use Dessine-moi?
+
+Imagine you need to convert complex, nested dictionaries into Python objects that you can work with naturally in your code. Manually writing parsers or converters for every data structure quickly becomes tedious, error-prone, and hard to maintain. 
+
+*Dessine-moi* was created precisely to address this challenge: it empowers you to define mappings from type identifiers in your data to Python classes, then automatically constructs instances with the correct initialization, even supporting nested and polymorphic object trees.
+
+### Key Benefits
+
+- **Dynamic object creation from nested dictionaries:** Automatically generate Python object hierarchies just by defining your types and passing dictionaries.
+- **Flexible type registration and aliasing:** Register classes dynamically, use aliases for multiple identifiers, and even delay imports until needed.
+- **Support for attrs and custom constructors:** Seamlessly integrate with the popular *attrs* library and classmethod constructors for added flexibility.
+- **Extensible and lightweight:** Customize construction logic by subclassing factories while keeping low dependencies and simple usage.
+
+### Who Should Care?
+
+- Python developers dealing with complex data serialization/deserialization
+- Teams building applications that consume nested JSON, YAML, or similar structures
+- Projects requiring clean separation between data formats and object models
+- Anyone looking for a Pythonic, easy-to-use factory pattern implementation
+
+---
+
+## What Is Dessine-moi? A Clear Definition
+
+At its core, *Dessine-moi* is a Python factory implementation tailored to translate nested dictionary data into well-typed Python objects. It leverages a registry that maps string type IDs to Python classes, enabling dynamic and recursive instantiation based solely on your input data.
+
+It simplifies the transformation workflow by:
+
+- Letting you **register Python classes with IDs** that appear as `type` values in your data
+- Supporting **conversion functions and custom constructors** to control instantiation behavior
+- Enabling **lazy loading** of types to optimize resource usage
+
+This means you describe your object model once, and *Dessine-moi* takes over creating complex object trees reliably and efficiently.
+
+---
+
+## Key Features & Capabilities
+
+### 1. Factory Object with a Type Registry
+Create a `Factory` instance to hold a mapping from type IDs (strings) to Python classes. This central registry is the foundation for all object creation.
+
+```python
+import dessinemoi
+factory = dessinemoi.Factory()
+```
+
+### 2. Type Registration
+Register your Python classes with meaningful `type_id`s. This can be done directly or using decorators. You can also register aliases.
+
+```python
+import attrs
+
+@attrs.define
+class Sheep:
+    wool = attrs.field(default="some")
+
+factory.register(Sheep, type_id="sheep")
+```
+
+Aliases allow multiple IDs for the same class, simplifying flexible data handling.
+
+### 3. Dynamic Object Instantiation
+Create objects purely by referencing their registered type ID and passing constructor arguments.
+
+```python
+merino = factory.create("sheep", kwargs={"wool": "lots"})
+print(merino)  # Output: Sheep(wool='lots')
+```
+
+You can also choose classmethod constructors:
+
+```python
+@classmethod
+def unsheavable(cls):
+    return cls(wool="none")
+
+Sheep.unsheavable = unsheavable
+
+factory.create("sheep", construct="unsheavable")  # Sheep(wool='none')
+```
+
+### 4. Dictionary Conversion
+Using `Factory.convert`, convert dictionaries containing `type` info directly into typed objects.
+
+```python
+factory.convert({"type": "sheep", "wool": "lots"})  # Sheep(wool='lots')
+```
+
+Non-dictionary objects are returned as-is.
+
+### 5. Lazy Registration
+Register types by string references to defer import until actual object creation.
+
+```python
+factory.register("datetime.datetime", type_id="datetime")
+# datetime type not imported yet
+
+obj = factory.create("datetime", args=(2022, 1, 1))
+# actual class imported and used
+```
+
+Lazy loading optimizes performance and startup time in large or modular projects.
+
+### 6. Extensibility
+Subclass `Factory` to customize how conversion and creation logic behaves, adapting to advanced workflows.
+
+---
+
+## Why Should I Care? Benefits & Use Cases
+
+### Outcomes You Can Expect
+
+- Effortless conversion from nested data into usable Python objects without verbose boilerplate
+- Improved code clarity and separation of concerns between data deserialization and business logic
+- Easy management of polymorphic types and nested hierarchies with a unified factory
+- Integration-ready with `attrs`-based classes, facilitating modern Python data modeling
+
+### Common Scenarios
+
+- Parsing complex API responses or configuration files represented as JSON/YAML
+- Building domain models from data in ETL pipelines
+- Implementing plugin systems where types may be registered dynamically or lazily
+- Creating test fixtures and mocks from simple dictionary specifications
+
+### Before vs After
+
+Before *Dessine-moi*, you might write repetitive custom code to manually traverse dictionaries and instantiate classes, with tedious error handling. After adopting *Dessine-moi*, you define your types once, register them, and rely on automated mechanisms that consistently produce correct objects, saving time and reducing bugs.
+
+---
+
+## Getting Started Preview
+
+### Quick Start
+To begin, install *Dessine-moi*:
+
+```bash
+python -m pip install dessinemoi
+```
+
+Then, create a factory, register your classes, and start creating objects:
+
+```python
+import dessinemoi
+import attrs
+
+factory = dessinemoi.Factory()
+
+@factory.register
+def class Sheep:
+    wool: str = "some"
+
+sheep = factory.create("sheep", kwargs={"wool": "lots"})
+print(sheep)
+```
+
+### Prerequisites
+- Python 3.8 or later
+- `attrs` library installed for seamless integration (not mandatory but strongly recommended)
+
+### Next Steps
+Explore:
+
+- `Key Features at a Glance` to understand all functionalities
+- `Core Concepts & Terminology` for foundational understanding
+- `Getting Started` guides for detailed setup and usage examples
+
+---
+
+Feel confident in adopting *Dessine-moi* to handle your nested data-to-object challenges with clarity, flexibility, and Pythonic elegance.
+
+---
+
+For more details, visit the official [Dessine-moi documentation](https://dessinemoi.readthedocs.io) or explore the source on [GitHub](https://github.com/rayference/dessinemoi).
