@@ -1,0 +1,302 @@
+---
+title: "Using Factories with attrs Classes"
+description: "Step through integrating Dessine-moi with attrs-based classes for automatic conversion of dictionaries into attributed Python objects. Includes tips for type safety and advanced conversion scenarios."
+---
+
+# Using Factories with attrs Classes
+
+Step through integrating Dessine-moi with attrs-based classes for automatic conversion of dictionaries into attributed Python objects. This guide helps you unlock the full power of attrs while leveraging Dessine-moi's flexible factory pattern for dynamic, extensible object creation.
+
+---
+
+## 1. Overview: Why Use Dessine-moi with attrs?
+
+If you use attrs to define immutable or mutable Python classes with well-structured attributes, Dessine-moi's Factory lets you seamlessly convert nested dictionaries (from JSON, YAML, or other sources) into instances of your attrs classes. This automated conversion eliminates boilerplate code and guards against type mismatches.
+
+**What you'll achieve:**
+- Register your attrs classes with Dessine-moi Factory
+- Instantiate attrs classes dynamically with arguments or from dicts
+- Use custom class method constructors where needed
+- Enable dictionary-to-object conversion, compatible with nested data
+
+**Prerequisites:**
+- Python 3.8+
+- Installed attrs package
+- Dessine-moi installed (`pip install dessinemoi`)
+- Basic familiarity with attrs (defining classes, fields)
+
+**Time estimate:** About 10-15 minutes
+
+**Difficulty:** Beginner to intermediate Python developers comfortable with attrs
+
+---
+
+## 2. Step-by-Step Integration Guide
+
+### Step 1: Define Your attrs Classes with _TYPE_ID
+
+Dessine-moi requires each registered class to have a unique string ID. The conventional approach is defining a class attribute `_TYPE_ID` on each attrs class.
+
+```python
+import attrs
+
+@attrs.define
+class Sheep:
+    _TYPE_ID = "sheep"
+    age: int = attrs.field()
+    name: str = attrs.field()
+
+@attrs.define
+class Lamb(Sheep):
+    _TYPE_ID = "lamb"
+```
+
+This ID lets the Factory registry identify the class when creating or converting objects.
+
+---
+
+### Step 2: Create and Initialize a Factory Instance
+
+Import Dessine-moi and instantiate a Factory that will hold your registrations.
+
+```python
+from dessinemoi import Factory
+
+factory = Factory()
+```
+
+This Factory starts with an empty registry where you will register your attrs types.
+
+---
+
+### Step 3: Register Classes to the Factory
+
+Use the `register` method to register your attrs classes. Dessine-moi looks for the `_TYPE_ID` attribute if you omit the `type_id` argument.
+
+Preferred decorator usage:
+
+```python
+@factory.register
+@attrs.define
+class Sheep:
+    _TYPE_ID = "sheep"
+    age: int
+    name: str
+
+@factory.register
+@attrs.define
+class Lamb(Sheep):
+    _TYPE_ID = "lamb"
+```
+
+You can also register existing classes explicitly:
+
+```python
+factory.register(Sheep)
+factory.register(Lamb)
+```
+
+**Tips:**
+- If you want alternative string IDs for the same class, use `aliases` in `register` or the `alias()` method afterward.
+- Overwriting an existing ID is prohibited by default; pass `overwrite_id=True` only if intentional.
+
+---
+
+### Step 4: Instantiate attrs Classes via Factory
+
+Create instances of registered attrs classes by calling `factory.create()` with the type ID.
+
+```python
+sheep = factory.create("sheep", kwargs={"age": 5, "name": "Dolly"})
+lamb = factory.create("lamb", kwargs={"age": 1, "name": "Timothy"})
+```
+
+You may supply constructor positional args via the `args` tuple and keyword args via `kwargs` dictionary.
+
+---
+
+### Step 5: Using Class Method Constructors
+
+Attrs classes often define alternative constructors as @classmethod. Dessine-moi supports this via the `construct` argument.
+
+Example:
+
+```python
+@factory.register
+@attrs.define
+class Sheep:
+    _TYPE_ID = "sheep"
+    age: int
+    name: str
+
+    @classmethod
+    def old(cls, name: str):
+        return cls(15, name)
+
+old_sheep = factory.create("sheep", construct="old", kwargs={"name": "Gertrude"})
+```
+
+This creates an instance using `Sheep.old(name='Gertrude')`.
+
+---
+
+### Step 6: Convert Nested Dictionaries into attrs Objects
+
+The power of Dessine-moi shines with the `convert()` method which recursively converts dictionaries with a `type` key into attrs objects.
+
+Example dictionary:
+
+```python
+nested_dict = {
+    "type": "sheep",
+    "age": 7,
+    "name": "Merino",
+}
+
+sheep_obj = factory.convert(nested_dict)
+print(sheep_obj)  # Sheep(age=7, name='Merino')
+```
+
+If your nested dictionaries include objects of various registered types, `convert()` will rebuild the entire object tree automatically.
+
+---
+
+### Step 7: Using dict_constructor for Specialized Instantiation
+
+If your attrs class requires special construction logic that differs from standard keyword-only initialization, you can register a class method constructor for dictionary conversion.
+
+Example with `dict_constructor`:
+
+```python
+@attrs.define
+class Sheep:
+    _TYPE_ID = "sheep"
+    wool: str = attrs.field()
+
+    @classmethod
+    def merino(cls):
+        return cls(wool="lots")
+
+factory.register(Sheep, dict_constructor="merino")
+
+merino_sheep = factory.convert({"type": "sheep"})
+print(merino_sheep)  # Sheep(wool='lots')
+```
+
+---
+
+## 3. Real-World Example
+
+```python
+import attrs
+from dessinemoi import Factory
+
+factory = Factory()
+
+@factory.register
+@attrs.define
+class Sheep:
+    _TYPE_ID = "sheep"
+    age: int
+    name: str
+
+    @classmethod
+    def default_sheep(cls):
+        return cls(age=1, name="Unnamed")
+
+@factory.register
+@attrs.define
+class Farm:
+    _TYPE_ID = "farm"
+    name: str
+    animals: list
+
+# Create instances normally
+sheep1 = factory.create("sheep", kwargs={"age": 3, "name": "Dolly"})
+
+# Convert from nested dictionary
+farm_data = {
+    "type": "farm",
+    "name": "Old MacDonald's",
+    "animals": [
+        {"type": "sheep", "age": 4, "name": "Shaun"},
+        {"type": "sheep", "age": 1, "name": "Timothy"},
+    ]
+}
+
+farm = factory.convert(farm_data)
+print(farm)
+```
+
+Output:
+```
+Farm(name='Old MacDonald\'s', animals=[Sheep(age=4, name='Shaun'), Sheep(age=1, name='Timothy')])
+```
+
+This shows Dessine-moi handling nested structures smoothly, creating lists of attrs objects from dictionaries.
+
+---
+
+## 4. Troubleshooting and Best Practices
+
+<AccordionGroup title="Common Issues with attrs Integration">
+<Accordion title="Missing or Incorrect _TYPE_ID">
+Ensure every attrs class registered has a unique `_TYPE_ID` string attribute. Omitting this will prevent registration via decorator and cause create or convert to fail.
+</Accordion>
+<Accordion title="Constructor Arguments Fail">
+Attrs classes with positional-only fields or non-keyword arguments may raise errors on `convert()`. Use `dict_constructor` registration to bypass the default initialization and use custom logic.
+</Accordion>
+<Accordion title="Unregistered Type Identifier in Dictionary">
+A dictionary with a `type` value not registered with Factory triggers `ValueError` on `convert()`. Register all expected types before conversion.
+</Accordion>
+<Accordion title="Using Class Method Constructor Fails">
+Invalid `construct` argument names or forgetting `@classmethod` decorator lead to errors. Confirm method exists and is a classmethod.
+</Accordion>
+</AccordionGroup>
+
+<Tip>
+To optimize performance, register all relevant attrs classes with the Factory at startup before bulk conversions.
+</Tip>
+
+<Tip>
+Leverage aliases if you want multiple string IDs for the same attrs class to support backward compatibility or alternative naming schemes.
+</Tip>
+
+<Tip>
+Remember that the `convert()` method leaves non-dict inputs unchanged, making it safe to apply on mixed collections.
+</Tip>
+
+---
+
+## 5. Next Steps & Related Documentation
+
+- Explore the **[Your First Factory: Quick Start](../getting-started/quick-start-factory)** guide for foundational setup and usage
+- Learn about **[Creating Objects from Dictionaries](../getting-started/dictionary-object-creation)** to master conversion workflows
+- Understand **[Type Registration and Mapping](../../api-reference/factory-core-api/type-registration)** for advanced type management
+- Dive into **[Attrs-Compatible Converters](../../api-reference/advanced-and-integration/attrs-converters)** for deeper integration details
+- Consult **[Troubleshooting and Common Pitfalls](../practical-patterns/troubleshooting-common-errors)** to avoid and solve common problems
+
+If you haven’t yet, ensure you reviewed the **[Prerequisites and Installation](../../getting-started/setup/prerequisites)** for full environment setup.
+
+---
+
+## 6. Summary Diagram
+
+```mermaid
+flowchart TD
+    A[User defines attrs classes with _TYPE_ID]
+    B[Create Factory instance]
+    C[Register classes to Factory]
+    D[Use Factory.create() to instantiate classes]
+    E[Use Factory.convert() to convert dicts to attrs objects]
+    F[Optionally specify classmethod constructors]
+
+    A --> B --> C --> D
+    C --> E
+    D --> F
+    E --> F
+```
+
+This workflow illustrates the lifecycle from class definition to dynamic instantiation and dictionary-driven conversion.
+
+---
