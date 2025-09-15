@@ -1,0 +1,176 @@
+---
+title: "Key Features at a Glance"
+description: "Quickly enumerate the product's standout capabilities, including registering types, object creation from dictionaries, attrs-compatible conversion, and customization. This lets users rapidly assess feature fit."
+---
+
+# Key Features at a Glance
+
+Discover the essential capabilities of Dessine-moi that empower you to transform nested dictionaries into fully instantiated Python objects with ease. This overview lets you quickly evaluate how the product fits your needs by highlighting core functionalities including type registration, object creation, seamless integration with attrs, and deep customization options.
+
+---
+
+## Fast Type Registration
+
+Dessine-moi simplifies the process of registering Python classes with your factory. You can:
+
+- Register classes directly by their Python object or via a lazy string reference to defer imports.
+- Associate custom type identifiers (`type_id`) to easily reference classes for creation.
+- Define multiple aliases for a single registered type, enabling flexible references.
+- Register with optional dictionary constructors, such as class methods, that shape how objects are created from dictionaries.
+
+### Example
+
+```python
+from dessinemoi import Factory
+import attrs
+
+factory = Factory()
+
+@attrs.define
+class Sheep:
+    _TYPE_ID = 'sheep'
+    wool: str = 'some'
+
+factory.register(Sheep)  # Simple registration using _TYPE_ID
+factory.alias('sheep', 'mouton')  # Create an alias
+```
+
+
+## Dynamic Object Creation from Dictionaries
+
+Turn any dictionary conforming to your type system into a concrete Python object.
+
+- Instantiate objects using type IDs with optional positional and keyword arguments.
+- Support for restricting the kinds of types allowed for added safety.
+- Ability to select class method constructors during instantiation for advanced patterns.
+
+### Example
+
+```python
+sheep = factory.create('sheep', kwargs={'wool': 'thick'})
+print(sheep)  # Output: Sheep(wool='thick')
+
+# Using a custom constructor
+@attrs.define
+class Ram(Sheep):
+    _TYPE_ID = 'ram'
+    @classmethod
+    def old(cls, name):
+        return cls(wool='rough')
+
+factory.register(Ram)
+ram = factory.create('ram', construct='old')
+```
+
+
+## attrs-Compatible Converters
+
+Dessine-moi offers converters compatible with the attrs library, allowing automatic conversion of nested dictionaries directly into registered objects during class instantiation.
+
+- The `convert` method serves as a converter that recognizes dictionary inputs with a `type` key.
+- Converts only those dictionaries with recognized type IDs; otherwise, returns objects unchanged.
+- Can be restricted with `allowed_cls` to enforce type constraints.
+
+### Example
+
+```python
+input_data = {'type': 'sheep', 'wool': 'soft'}
+sheep_obj = factory.convert(input_data)
+print(sheep_obj)  # Sheep(wool='soft')
+```
+
+
+## Customization and Extensibility
+
+You control every aspect of how your factory behaves:
+
+- Customize the factory by subclassing and overriding conversion methods for specialized behaviors.
+- Support lazy registration by specifying class references as strings; imports happen only when needed.
+- Control overwrite behavior for registrations with the `overwrite_id` flag to safely update existing entries.
+- Extend the factory with aliases and multiple constructors to match evolving application needs.
+
+### Example
+
+```python
+# Register a type lazily by string path
+a_date_type = 'datetime.datetime'
+factory.register(a_date_type, type_id='datetime')
+
+# Object is created only when needed
+dt_obj = factory.create('datetime', args=(2025, 6, 25))
+print(dt_obj)  # 2025-06-25 00:00:00
+```
+
+
+## Why These Features Matter
+
+Imagine you have a deeply nested JSON structure representing complex domain objects with multiple types. Dessine-moi lets you register your domain models and automatically convert that JSON into a native Python object graph without writing manually nested constructors or parsers.
+
+This makes your codebase cleaner, reduces boilerplate, and increases development speed, especially when dealing with dynamic input where type definitions might change or grow.
+
+---
+
+## Troubleshooting and Best Practices
+
+- **Avoid type ID collisions:** By default, registering two classes with the same `type_id` raises an error. Use `overwrite_id=True` only if you explicitly want to replace a registration.
+- **Lazy registration caution:** When using strings for lazy loading, be aware that some safety checks are postponed until object creation time, so errors surface later.
+- **Dict constructors:** If your classes have alternate constructors for dictionary data, register them using the `dict_constructor` parameter to ensure correct instantiation.
+- **Restrict types for safety:** Use `allowed_cls` in `create` and `convert` methods to prevent unexpected types in sensitive contexts.
+
+---
+
+## Summary
+
+This page equips you to rapidly grasp Dessine-moi’s core capabilities, helping you decide whether its factory-centric approach fits your project’s object creation patterns.
+
+Next, deepen your understanding by exploring the following related documentation:
+
+- [What is Dessine-moi?](./product-intro) — for the overall product philosophy and value.
+- [Core Concepts & Terminology](../../core-concepts-and-architecture/core-concepts) — to understand the fundamental ideas behind the factory's design.
+- [Your First Factory: Usage Example](../../getting-started/first-steps/first-factory) — for a guided walkthrough of factory creation and object instantiation.
+
+For advanced usage and custom behavior, consult:
+
+- [Attrs-Compatible Converters](../../../api-reference/advanced-and-integration/attrs-converters)
+- [Customizing the Factory](../../../api-reference/advanced-and-integration/custom-factory-behaviors)
+
+Leverage these features now to transform your nested dict data into reliable, intuitively created Python objects with minimal effort.
+
+---
+
+## Additional Resources
+
+- Official GitHub Repository: [https://github.com/rayference/dessinemoi](https://github.com/rayference/dessinemoi)
+- PyPI Package: [https://pypi.org/project/dessinemoi](https://pypi.org/project/dessinemoi)
+- Documentation Homepage: [https://dessinemoi.readthedocs.io](https://dessinemoi.readthedocs.io)
+
+
+---
+
+## Code Snippet: Quick Feature Overview
+
+```python
+from dessinemoi import Factory
+import attrs
+
+factory = Factory()
+
+@factory.register
+@attrs.define
+class Sheep:
+    _TYPE_ID = 'sheep'
+    wool: str = 'some'
+
+# Creating and aliasing
+factory.alias('sheep', 'mouton')
+
+# Create object
+sheep_obj = factory.create('sheep', kwargs={'wool': 'thick'})
+
+# Convert dictionary directly
+converted = factory.convert({'type': 'sheep', 'wool': 'soft'})
+
+print(sheep_obj, converted)
+```
+
+---
