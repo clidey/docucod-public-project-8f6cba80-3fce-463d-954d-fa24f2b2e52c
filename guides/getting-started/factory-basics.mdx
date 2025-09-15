@@ -1,0 +1,183 @@
+---
+title: "Factory Basics: Setup and Core Concepts"
+description: "A foundational walkthrough on initializing a Factory object, understanding how the factory pattern is applied in Dessine-moi, and a look at what problems this library solves. Includes step-by-step creation and inspection of a Factory instance."
+---
+
+# Factory Basics: Setup and Core Concepts
+
+## Introduction
+
+The factory pattern implemented by *Dessine-moi* provides a powerful way to dynamically create objects in Python from identifiers and dictionary data. This guide walks you through initializing a Factory object, understanding its registry system, and how the pattern helps solve common challenges when building complex object trees from raw, nested dictionaries like those from JSON or YAML.
+
+By the end of this guide, you will have a firm understanding of the Factory’s role, how to inspect it, and the groundwork needed to register types and create objects dynamically.
+
+---
+
+## Workflow Overview
+
+### Task Description
+- Set up your own Factory object to manage type registration and dynamic object instantiation.
+- Understand how the factory pattern shapes the workflow in *Dessine-moi*.
+- Learn how to inspect the factory’s current state.
+
+### Prerequisites
+- Python 3.8 or higher installed
+- *Dessine-moi* package installed (`pip install dessinemoi`)
+- Basic familiarity with Python classes
+
+### Expected Outcome
+- You will have created a Factory instance.
+- You will know how to access and interpret the factory's registry.
+- You will grasp the core concept of using IDs to map to Python types for dynamic instantiation.
+
+### Time Estimate
+- Approximately 5 minutes
+
+### Difficulty Level
+- Beginner
+
+---
+
+## Step-by-Step Instructions
+
+<Steps>
+<Step title="Create a Factory Object">
+Start by importing the *Dessine-moi* package and instantiate the Factory class:
+
+```python
+import dessinemoi
+factory = dessinemoi.Factory()
+```
+
+This initializes an empty Factory instance.
+
+**Expected Result:** An empty factory with no registered types.
+</Step>
+
+<Step title="Inspect the Factory Registry">
+Check the internal registry, which is a mapping from string IDs to Python classes:
+
+```python
+print(factory)
+# Output: Factory(registry={})
+```
+
+This confirms that no types are currently linked to the factory.
+
+**Expected Result:** Registry shows as empty `{}`.
+</Step>
+
+<Step title="Understand the Factory’s Role">
+Recognize that the factory serves as a dynamic lookup table to create objects by type ID.
+
+When IDs are linked to classes, you can instantiate objects without referring directly to those classes.
+
+**Example:**
+This approach is ideal when building object hierarchies from nested dictionaries (e.g., JSON payloads), letting you interpret the 'type' key into actual Python objects.
+</Step>
+</Steps>
+
+---
+
+## Practical Example
+
+Here’s a simple Python script that sets up a Factory and inspects it:
+
+```python
+import dessinemoi
+
+# Create a factory instance
+factory = dessinemoi.Factory()
+
+# Check the empty registry
+print(factory)  # Expect: Factory(registry={})
+```
+
+Run this script in your Python environment to verify your setup.
+
+---
+
+## Tips & Best Practices
+
+- **Keep Factory Instance Accessible:** Typically, you create one Factory instance per application or module responsible for dynamic object creation.
+
+- **Registry Inspection:** Regularly print or inspect the `factory.registry` attribute during development to understand which types are available.
+
+- **Start Simple:** Begin with an empty factory, then progressively register types as you build your application's type system.
+
+- **Use Clear Type IDs:** Choose meaningful string IDs when you register types to make debugging and maintenance easier.
+
+---
+
+## Common Pitfalls & Troubleshooting
+
+<AccordionGroup title="Troubleshooting Empty Factory Registry">
+<Accordion title="Why is my factory registry empty after creation?">
+The factory starts empty by design. You must explicitly register your Python types to populate the registry.
+
+If `factory.registry` remains empty after expected registrations, verify that your register calls succeeded without exceptions.
+</Accordion>
+<Accordion title="What if I see type registration conflicts?">
+Multiple registrations of the same ID without allowing overwrite will raise errors.
+
+To replace an existing ID, use `overwrite_id=True` in your register call.
+</Accordion>
+<Accordion title="How do I verify my Factory instance is correctly created?">
+Use `isinstance(factory, dessinemoi.Factory)` to confirm the factory object is properly instantiated.
+
+Also ensure your Python environment has the correct *Dessine-moi* package version installed.
+</Accordion>
+</AccordionGroup>
+
+---
+
+## Understanding the Factory Pattern in Dessine-moi
+
+The Factory object implements a registry mapping:
+
+- **ID (string)** → **Python class type**
+
+This enables:
+
+- Dynamic object creation based on string identifiers
+- Abstraction of object construction away from hardcoded class names
+- Support for hierarchical, nested object tree creation from untyped dictionaries
+
+The factory pattern helps decouple data structure declaration and object instantiation logic, making your code more modular and easier to extend.
+
+
+---
+
+## Next Steps & Related Content
+
+Now that you have your Factory instance and understand its core concept, move forward with:
+
+- [Registering Types and Building Object Trees](../getting-started/registering-types) ■ Learn how to add your Python types to the Factory.
+- [Creating Objects from Dictionaries](../getting-started/dict-to-object) ■ Use the Factory to convert raw dictionaries into fully typed objects.
+- [attrs-integration: Converters and Automatic Object Creation](../../guides/advanced-usage/attrs-integration) ■ Dive deeper into seamless type conversion with attrs.
+
+For reference about Factory class methods and API, consult the [API Reference: Factory](../../api-reference/core-api/factory-class).
+
+---
+
+## References
+
+- [Dessine-moi Official Documentation](https://dessinemoi.readthedocs.io)
+- [Dessine-moi on PyPI](https://pypi.org/project/dessinemoi)
+- [Dessine-moi GitHub Repository](https://github.com/rayference/dessinemoi)
+
+
+---
+
+<CardGroup cols={2}>
+<Card title="Guide: Registering Types and Building Object Trees">
+Extend your Factory by defining types and linking them to IDs for creation.
+</Card>
+<Card title="Guide: Creating Objects from Dictionaries">
+Transform JSON-like dictionaries into Python objects dynamically using your Factory.
+</Card>
+</CardGroup>
+
+<Info>
+Need help getting started with the factory pattern? Check the [Getting Started Basics](../../getting-started/setup-basics/prerequisites) before diving deeper into usage.
+</Info>
