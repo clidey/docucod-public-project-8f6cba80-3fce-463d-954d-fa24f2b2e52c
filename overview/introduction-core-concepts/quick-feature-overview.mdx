@@ -1,0 +1,160 @@
+---
+title: "Key Features at a Glance"
+description: "A concise rundown of Dessine-moi's primary features: registering types, factory-driven object creation, dictionary conversion, and customizability. Highlights how these help developers bridge the gap from raw data to structured Python objects."
+---
+
+# Key Features at a Glance
+
+Discover Dessine-moi’s essential capabilities in transforming raw data into structured Python objects with elegance and efficiency. This concise spotlight reveals how Dessine-moi empowers developers to register types, create instances via factories, convert dictionaries seamlessly, and tailor workflows to complex needs.
+
+---
+
+## Unlocking Dessine-moi's Core Powers
+
+Dessine-moi is designed to help you build Python object trees dynamically from nested data, such as JSON-like dictionaries. Instead of manually crafting every object, Dessine-moi uses a factory pattern approach, where you register your Python classes once and then effortlessly create instances from simple data structures.
+
+### Why It Matters for You
+
+Imagine receiving complex nested dictionaries from an API or configuration files. Dessine-moi lets you map those directly into usable Python objects without verbose boilerplate code. This saves time, reduces errors, and makes your codebase more maintainable and expressive.
+
+---
+
+## Essential Features Explained
+
+### 1. Register Types to the Factory
+
+Start by creating a factory and registering your classes (types) with unique identifiers. Registration can be explicit by specifying the type and ID or done elegantly through decorators.
+
+- **Registering a class:** Associates a string ID with a Python class.
+- **Aliases:** Multiple IDs can point to the same class, providing flexibility.
+- **Lazy Registration:** You can defer importing the class until it's needed, boosting startup speed.
+
+```python
+import dessinemoi
+import attrs
+
+factory = dessinemoi.Factory()
+
+@factory.register(type_id='sheep')
+@attrs.define
+class Sheep:
+    wool: str = 'some'
+
+# Registering with aliases
+factory.alias('sheep', 'mouton')
+```
+
+### 2. Factory-Driven Object Creation
+
+Once registered, the factory can create instances of your classes by specifying the type ID and optionally passing constructor arguments.
+
+- Supports positional and keyword arguments.
+- Supports specifying allowed classes to ensure type safety.
+- Allows using class method constructors for specialized instantiation.
+
+```python
+merino = factory.create('sheep', kwargs={'wool': 'lots'})
+print(merino)  # Sheep(wool='lots')
+
+# Using a class method constructor
+@attrs.define
+class Sheep:
+    wool: str
+
+    @classmethod
+    def unsheavable(cls):
+        return cls(wool='none')
+
+factory.register(Sheep, type_id='sheep', overwrite_id=True)
+
+unsheared = factory.create('sheep', construct='unsheavable')
+print(unsheared)  # Sheep(wool='none')
+```
+
+### 3. Convert Dictionaries to Objects Automatically
+
+Dessine-moi shines in converting nested dictionaries into the right Python object trees using the factory’s `convert` method.
+
+- The dictionary must include a `type` key indicating the type ID.
+- Non-dictionary values are returned unchanged.
+- Supports restricting conversions to allowed classes.
+- Supports dictionary-based custom constructors.
+
+```python
+data = {'type': 'sheep', 'wool': 'soft'}
+sheep_obj = factory.convert(data)
+print(sheep_obj)  # Sheep(wool='soft')
+```
+
+### 4. Customize Factories for Your Needs
+
+If the default behavior does not cover all your use cases, Dessine-moi allows subclassing the factory and overriding methods like `convert`. This flexibility lets you adapt dictionary conversion or instantiation logic as needed.
+
+### 5. Lazy Type Registration
+
+To avoid unnecessary imports or heavyweight dependencies, you can register types by their qualified string name. The actual class is only loaded when created.
+
+```python
+factory.register('datetime.datetime', type_id='datetime')
+dt = factory.create('datetime', args=(2024, 6, 25))
+print(dt)  # 2024-06-25 00:00:00
+```
+
+---
+
+## How These Features Solve Your Challenges
+
+- **Simplify Data to Objects:** Instead of manually parsing and building trees, just register types once.
+- **Maintain Flexibility:** Easily extend the factory for complex workflows or new use cases.
+- **Improve Performance:** Lazy registration avoids unnecessary imports until truly needed.
+- **Reduce Boilerplate:** Dictionary conversion means less repetitive code when receiving JSON or config data.
+
+You move from cumbersome, error-prone object construction to clean, declarative object creation flows.
+
+---
+
+## Getting Started Preview
+
+Begin with instantiating a Factory and registering your first types. Then, instantiate objects directly or convert dictionaries into structured typed objects with ease.
+
+For detailed instructions, visit the [Getting Started section](/getting-started/setup-basics/prerequisites) to set up your environment, followed by [Basic Configuration and Import](/getting-started/first-usage/basic-setup).
+
+---
+
+## Practical Tip
+
+When registering classes that use custom class method constructors for dictionary conversion, map the method name as the `dict_constructor` argument to optimize your factory conversions.
+
+```python
+factory.register(Sheep, type_id='sheep', dict_constructor='unsheavable')
+obj = factory.convert({'type': 'sheep'})
+print(obj)  # Sheep(wool='none')
+```
+
+This way, the factory knows exactly how to convert dictionaries for that type.
+
+---
+
+## Troubleshooting Common Pitfalls
+
+- **Error on Unregistered Types:** Always ensure the `type_id` exists in your factory’s registry.
+- **Constructor Argument Mismatches:** Check your class constructors accept keyword-only arguments for dictionary conversion.
+- **Lazy Type Usage Requires IDs:** Register lazy types with explicit `type_id` to avoid errors.
+
+For more troubleshooting, see [Troubleshooting Common Setup Issues](/getting-started/first-usage/troubleshooting).
+
+---
+
+Harness these core features to transform raw nested data and unleash the full power of structured Python object management with Dessine-moi.
+
+
+---
+
+For deeper insights, explore the related topics:
+- [What is Dessine-moi?](/overview/introduction-core-concepts/what-is-dessinemoi)
+- [Core Concepts & Terminology](/overview/introduction-core-concepts/core-concepts-terminology)
+- [Factory Usage Examples](/api-reference/usage-patterns/factory-in-action)
+- [Customizing Factories for Complex Workflows](/guides/advanced-usage/customizing-factories)
+
+
+<Source url="https://github.com/rayference/dessinemoi" branch="main" paths={[{"path": "docs/usage.rst", "range": "10-150"}]} />
