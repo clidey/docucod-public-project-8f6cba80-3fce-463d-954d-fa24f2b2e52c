@@ -1,0 +1,127 @@
+---
+title: "Latest Release Notes"
+description: "Covers the most recent version with a user-focused summary of what’s new, improved, and fixed. Ideal for users considering an update or wanting to track the project’s recent progress."
+---
+
+# Latest Release Notes
+
+Stay up to date with the most recent changes, improvements, and fixes delivered in the latest version of *Dessine-moi*. This page presents a user-focused summary designed to help you quickly understand what’s new and how these changes impact your usage.
+
+---
+
+## Dessine-moi 25.1.0 (2025-06-25)
+
+### Highlights for Users
+
+- *Dessine-moi* is now officially available on **conda-forge**, simplifying installation and updates in Conda environments.
+- The documentation page previously titled "What's New?" has been renamed to **"Release Notes"** for clearer navigation and understanding.
+- Added full support for **Python 3.13**, ensuring compatibility with the latest Python release.
+
+### Developer-Facing Changes
+
+- Project management has migrated from Rye to **uv**, reflecting improved tooling preferences and workflows.
+
+---
+
+## Dessine-moi 24.1.0 (2024-02-25)
+
+### User-Facing Improvements
+
+- Added support for **Python 3.12**, keeping *Dessine-moi* compatible with current Python advancements.
+
+### Developer-Side Adjustments
+
+- Switched project management from PDM to Rye.
+- Removed Nox, replacing test management with Rye tasks.
+- Phased out Conda development environment support.
+- Moved from Black to **Ruff** as the code formatter in pre-commit hooks.
+- Discontinued use of Copier project template.
+
+---
+
+## Dessine-moi 23.1.0 (2023-02-22)
+
+- **Dropped support for Python 3.7** to focus on newer Python versions.
+- Added support for **Python 3.11**.
+
+---
+
+## Dessine-moi 22.2.0 (2022-07-29)
+
+### Fixes and Improvements
+
+- `LazyType.convert()` now properly resolves lazy types, improving dynamic type handling.
+- The `Factory` now includes a **new alias system**, enabling more flexible type registration and referencing.
+- Renamed `allow_id_overwrite` to `overwrite_id` in `Factory.register()` for clearer semantics.
+
+---
+
+## Dessine-moi 22.1.1 (2022-07-28)
+
+### Bug Fixes
+
+- Improved `LazyType.load()` by replacing `__import__()` with `importlib.import_module()`, enhancing dynamic import reliability.
+
+---
+
+## Dessine-moi 22.1.0 (2022-07-19)
+
+### New Features
+
+- Support added for **string-based lazy registration** in the `Factory`, enabling deferred importing and registration of types.
+
+### Developer-Side Updates
+
+- Migration from Poetry to PDM for project management workflows.
+- Applied Copier templating for project initialization.
+- Refactored code to place implementation within a dedicated module.
+- Updated to next-generation `attrs` API for improved compatibility.
+
+---
+
+## Historical Releases and Notable Features
+
+- 21.3.0: Arguments of Factory's methods were made keyword-only to increase clarity.
+- 21.2.0: Added `construct` keyword argument to `Factory.create()`, allowing object creation without calling the constructor.
+- 21.1.0: Initial release of the project.
+
+---
+
+# Practical Update Guidance
+
+If you are updating from versions before 22.1.0, be aware that several breaking changes and major shifts in package management and Python version support have been introduced. Before upgrading, review the detailed migration guides available in the Breaking Changes and Migration Guides section to ensure a smooth transition.
+
+# Tips and Best Practices
+
+- **Installation:** For simpler management, prefer Conda installation from conda-forge starting from version 25.1.0.
+- **Python Compatibility:** Always verify your environment runs a supported Python version (3.8 through 3.13 as of latest).
+- **Type Registration:** Explore lazy registration features introduced in 22.1.0 to optimize startup time and dependencies.
+
+# Troubleshooting
+
+If you experience issues after upgrade:
+
+- Confirm Python version compatibility.
+- Check the Factory alias system if using custom type registrations.
+- Refer to error handling best practices under the API Reference for troubleshooting instantiation or conversion issues.
+
+---
+
+# Related Documentation and Resources
+
+- [Breaking Changes and Migration Guidance](/changelog/breaking-changes-migration/breaking-changes) — detailed migration instructions and deprecation timelines.
+- [Upgrade & Migration Guides](/changelog/breaking-changes-migration/migration-guides) — step-by-step help for upgrading across major versions.
+- [Factory API Reference](/api-reference/core-api/factory-class) — learn more about the Factory class enhancements.
+- [Installation Instructions](/getting-started/setup-basics/installation) — how to get started or upgrade with ease.
+- [Release History Overview](/changelog/release-history/version-overview) — full chronological list of releases.
+
+---
+
+# Quick Link to GitHub Releases
+
+For a detailed view of changes and commit history, visit the official GitHub releases page: [Dessine-moi Releases](https://github.com/rayference/dessinemoi/releases)
+
+---
+
+*Stay informed, leverage the latest improvements, and keep your projects running smoothly with Dessine-moi’s ongoing evolution.*
+
