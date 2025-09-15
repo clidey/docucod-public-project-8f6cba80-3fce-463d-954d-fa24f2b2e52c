@@ -1,0 +1,271 @@
+---
+title: "Creating Objects from Dictionaries"
+description: "Guides you through converting nested dictionaries (such as those from JSON) into Python objects using Dessine-moi. Explains how object instantiation works and demonstrates example conversions, highlighting error handling and edge considerations."
+---
+
+# Creating Objects from Dictionaries
+
+This guide walks you through the process of converting nested dictionaries — such as those parsed from JSON data — into fully typed Python objects using *Dessine-moi*. You'll learn how the object instantiation pipeline works, how to perform conversions, and how to handle errors and edge cases with confidence.
+
+---
+
+## Workflow Overview
+
+### What You Will Achieve
+By following this guide, you'll be able to:
+- Instantiate Python objects from dictionary data automatically.
+- Convert complex, nested dictionary structures into object trees.
+- Leverage the *Dessine-moi* factory's powerful `convert` method to simplify data handling.
+- Handle conversion errors and edge cases effectively.
+
+### Prerequisites
+Before you start, ensure that:
+- You have installed *Dessine-moi* and its dependencies (see the Installation Instructions).
+- You have a working Python environment (3.8+).
+- You have registered your target classes with the *Dessine-moi* Factory (see Registering Types).
+
+### Expected Outcome
+After completing this guide, your application can intake raw dictionaries—with nested structure if needed—and produce fully initialized Python objects of the correct types, using your factory’s registered types and constructors.
+
+### Time Commitment
+Approximately 10-20 minutes, depending on familiarity with *Dessine-moi* and your existing classes.
+
+### Difficulty Level
+Beginner to Intermediate
+
+---
+
+## Step-by-Step Instructions
+
+<Steps>
+<Step title="Step 1: Prepare Your Types and Factory">
+Define your Python classes as usual. Using the `attrs` library is recommended for convenience but not mandatory.
+
+Example:
+
+```python
+import attrs
+
+@attrs.define
+class Sheep:
+    wool: str = "some"
+
+@attrs.define
+class Lamb(Sheep):
+    _TYPE_ID = "lamb"
+```
+
+Then, create a *Dessine-moi* factory and register these types with unique IDs:
+
+```python
+from dessinemoi import Factory
+
+factory = Factory()
+factory.register(Sheep, type_id="sheep")
+factory.register(Lamb)
+```
+
+Expected result: Your factory registry now maps the IDs `sheep` and `lamb` to your classes.
+</Step>
+
+<Step title="Step 2: Understand the Dictionary Format">
+The dictionary you intend to convert should specify the `type` key with a value matching a registered type ID.
+
+Example nested dictionary:
+
+```python
+sheep_dict = {
+    "type": "sheep",
+    "wool": "thick"
+}
+
+lamb_dict = {
+    "type": "lamb",
+    "wool": "thin"
+}
+```
+
+For nested objects, ensure nested dictionaries also contain a `type` key for proper recursive instantiation.
+</Step>
+
+<Step title="Step 3: Convert Dictionaries into Objects">
+Use the factory's `convert` method to transform the dictionaries into objects.
+
+Simple conversion example:
+
+```python
+sheep_obj = factory.convert(sheep_dict)
+lamb_obj = factory.convert(lamb_dict)
+
+print(sheep_obj)  # Sheep(wool='thick')
+print(lamb_obj)   # Lamb(wool='thin')
+```
+
+Expected result: Python instances of your registered types with attributes set accordingly.
+</Step>
+
+<Step title="Step 4: Handle Nested Dictionary Conversion">
+*Dessine-moi* supports nested dictionaries, automatically converting nested structures when those nested types are registered.
+
+Example:
+
+```python
+@attrs.define
+class Farm:
+    name: str
+    sheep: Sheep
+
+factory.register(Farm)
+
+farm_dict = {
+    "type": "farm",
+    "name": "Sunny Acres",
+    "sheep": {
+        "type": "sheep",
+        "wool": "very thick"
+    }
+}
+
+farm_obj = factory.convert(farm_dict)
+print(farm_obj.sheep)  # Sheep(wool='very thick')
+```
+
+Expected result: Nested dictionary for `sheep` becomes a `Sheep` instance within your `Farm` object.
+</Step>
+
+<Step title="Step 5: Use Dict Constructors for Custom Instantiation">
+If your classes define alternative constructors as class methods, you can register these to be used during dictionary conversion.
+
+Example:
+
+```python
+@attrs.define
+class Sheep:
+    wool: str
+
+    @classmethod
+    def merino(cls):
+        return cls(wool="lots")
+
+factory.register(Sheep, type_id="sheep", dict_constructor="merino")
+
+sheep_obj = factory.convert({"type": "sheep"})
+print(sheep_obj.wool)  # 'lots'
+```
+
+Expected result: The `merino` class method is called to instantiate `Sheep` when the dictionary is converted.
+</Step>
+
+<Step title="Step 6: Restrict Conversion with Allowed Classes">
+You can restrict which types are valid for conversion through the `allowed_cls` parameter.
+
+Example:
+
+```python
+try:
+    obj = factory.convert({"type": "sheep"}, allowed_cls=Lamb)
+except TypeError as e:
+    print(e)  # 'sheep' does not reference allowed type <class 'Lamb'>
+```
+
+Expected result: A TypeError is raised if the dictionary’s type is not among allowed classes.
+</Step>
+
+<Step title="Step 7: Verify Conversion and Handle Errors">
+Confirm conversion succeeded by verifying the type returned and its attributes.
+
+If a dictionary is missing the `type` key or specifies an unknown type ID, conversion will raise a `ValueError`.
+
+Example error handling:
+
+```python
+invalid_dict = {"wool": "none"}  # Missing 'type'
+
+try:
+    factory.convert(invalid_dict)
+except ValueError as e:
+    print(f"Conversion failed: {e}")
+```
+
+Expected result: Clear error messages guide correction of input data.
+</Step>
+</Steps>
+
+---
+
+## Example: Full Conversion Scenario
+
+```python
+import attrs
+from dessinemoi import Factory
+
+@attrs.define
+class Sheep:
+    wool: str = "some"
+
+@attrs.define
+class Farm:
+    name: str
+    resident: Sheep
+
+factory = Factory()
+factory.register(Sheep)
+factory.register(Farm)
+
+nested_dict = {
+    "type": "farm",
+    "name": "Happy Farm",
+    "resident": {
+        "type": "sheep",
+        "wool": "soft"
+    }
+}
+
+farm = factory.convert(nested_dict)
+print(farm)
+print(farm.resident.wool)  # Output: soft
+```
+
+Outcome: The `Farm` object is created with a nested `Sheep` instance correctly initialized.
+
+---
+
+## Troubleshooting & Best Practices
+
+### Common Issues
+
+- **Missing `type` key in dictionary:** Conversion requires a `type` key specifying a registered type ID. Ensure your dictionaries include it.
+- **Unregistered type ID:** Before converting, verify the type ID exists in the factory’s registry to avoid `ValueError`.
+- **Dict constructor misconfiguration:** If specifying `dict_constructor`, confirm the method exists on the class, else registration will fail.
+- **Nested dictionary inconsistencies:** Ensure nested dictionaries are structured correctly with their own `type` keys.
+
+### Best Practices
+
+- Always register all classes expected in the dictionary before conversion to enable smooth recursive instantiation.
+- Use `allowed_cls` in `convert` to enforce strict type safety when security or data integrity is a concern.
+- Leverage class method constructors for more complex instantiation logic to keep your classes clean and reusable.
+- Use lazy registration to defer expensive imports when your application’s startup time matters.
+
+### Performance Considerations
+
+- Deeply nested dictionaries will trigger recursive conversions; keep input data size in check.
+- Using lazy types delays import time and can improve initial load but may add a slight delay on the first object creation.
+
+### Alternative Approaches
+
+- Subclass `Factory` and override `convert` for custom conversion logic if your use cases require parsing dictionary entries that don’t follow the `type` key pattern.
+
+---
+
+## Next Steps & Related Content
+
+- Continue to **[Registering Types and Building Object Trees](/guides/getting-started/registering-types)** to master type registration techniques.
+- Explore **[Factory Basics: Setup and Core Concepts](/guides/getting-started/factory-basics)** for a foundational understanding of the factory pattern in *Dessine-moi*.
+- Dive into **[attrs-integration: Converters and Automatic Object Creation](/guides/advanced-usage/attrs-integration)** to seamlessly integrate with the `attrs` library.
+- For troubleshooting, see **[Troubleshooting Common Setup Issues](/getting-started/first-usage/troubleshooting)**.
+
+---
+
+<Info>
+This guide focuses specifically on converting dictionaries into objects. For a more comprehensive understanding of how factories work, visit the Architecture Overview and Core Concepts chapters.
+</Info>
