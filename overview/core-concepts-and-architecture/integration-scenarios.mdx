@@ -1,0 +1,177 @@
+---
+title: "Typical Use Cases & Integration Points"
+description: "Describe common usage patterns—building objects from JSON, integrating with attrs-based workflows, or customizing factories. Situate Dessine-moi within a Python ecosystem and clarify extension points."
+---
+
+# Typical Use Cases & Integration Points
+
+Dessine-moi shines in scenarios where Python developers need a flexible, dynamic approach to building complex object graphs from nested dictionary data—commonly found in JSON documents, configuration files, or data interchange formats. This page guides you through the most common usage patterns, integration strategies with popular Python tooling such as *attrs*, and how to extend or customize Dessine-moi to fit your unique projects.
+
+---
+
+## Building Objects from Nested JSON or Dictionaries
+
+At its core, Dessine-moi enables you to translate deeply nested dictionaries into fully instantiated Python objects. This is invaluable when working with APIs, configuration management, or data processing pipelines that yield JSON-like data.
+
+**User flow:**
+
+- Receive or load a JSON object (e.g., a configuration or data payload).
+- Pass the dictionary to a Dessine-moi factory instance.
+- The factory dynamically determines types by inspecting a "type" field (or configured key) in the dictionaries.
+- The factory recursively creates Python objects, nesting as appropriate.
+
+```python
+from dessinemoi import Factory
+import attrs
+
+@attrs.define
+class Animal:
+    name: str
+
+@attrs.define
+class Sheep(Animal):
+    wool_color: str
+
+factory = Factory()
+factory.register(Sheep)
+
+json_data = {
+    "type": "Sheep",
+    "name": "Dolly",
+    "wool_color": "white"
+}
+
+sheep_obj = factory.convert(json_data)
+print(sheep_obj)
+# Sheep(name='Dolly', wool_color='white')
+```
+
+This pattern simplifies the handling of complex input, removes boilerplate object creation code, and enhances maintainability as your data models evolve.
+
+
+## Seamless Integration with attrs-Based Workflows
+
+Dessine-moi works hand in hand with the *attrs* library, itself a popular standard for defining Python classes with attributes and validation. By leveraging *attrs* compatibility, Dessine-moi automatically respects your attribute definitions and conversion logic.
+
+**Benefits:**
+
+- Uses your existing *attrs* classes without modification.
+- Produces immutable or frozen instances if defined.
+- Supports *attrs* converters and validators transparently.
+
+For users building validated data models with *attrs*, Dessine-moi becomes the natural factory to instantiate these models directly from dictionary data.
+
+
+## Customizing Factory Behaviors and Extension Points
+
+Dessine-moi is designed to adapt to your workflow and data conventions.
+
+**Customization options include:**
+
+- **Type Registration:** Map custom type IDs or aliases to your classes.
+- **Custom Constructors:** Register alternate classmethods for instantiation beyond the default constructor.
+- **Lazy Types:** Support deferred type loading to improve startup times or manage dependencies.
+- **Allowed Type Restrictions:** Tighten conversion scope to subtypes for safety.
+
+These extension points let you align the factory’s behavior with your application's domain logic, enforcing constraints or enabling complex object initialization.
+
+
+<AccordionGroup title="Common Integration Points and Workflows">
+<Accordion title="Using Aliases and Type IDs">
+Dessine-moi allows you to register multiple aliases for a single class type. This is useful when the same logical object is represented by different type strings in diverse data sources. Aliases simplify harmonizing input without rewriting data.
+
+Example:
+
+```python
+factory.register(Sheep, type_id="sheep", aliases=["mouton", "ovino"])
+obj = factory.convert({"type": "mouton", "name": "Ewe"})
+```
+</Accordion>
+<Accordion title="Custom dict_constructors">
+You can specify custom classmethod constructors that Dessine-moi calls instead of __init__ during conversion. This supports complex object creation logic like default values, validation, or derived attributes.
+
+Example:
+
+```python
+@attrs.define
+class Sheep:
+    wool: str
+
+    @classmethod
+    def merino(cls):
+        return cls(wool="lots")
+
+factory.register(Sheep, type_id="sheep", dict_constructor="merino")
+sheep = factory.convert({"type": "sheep"})  # Uses merino() constructor
+```
+</Accordion>
+<Accordion title="Lazy Loading Types">
+To improve performance or handle cross-module references, Dessine-moi supports lazy types specified by module paths. The factory resolves these references at object creation time, allowing for more modular and scalable designs.
+
+```python
+factory.register(LazyType("module.submodule", "ClassName"), type_id="lazytype")
+obj = factory.create("lazytype")  # Dereferences LazyType upon call
+```
+</Accordion>
+</AccordionGroup>
+
+
+## Positioning Dessine-moi in the Python Ecosystem
+
+Dessine-moi complements rather than replaces native JSON parsing or ORM libraries. Its role is focused strictly on dynamic, flexible object graph construction from arbitrary nested dict data, with special attention to *attrs* integration and factory patterns.
+
+Developers often pair Dessine-moi with:
+
+- **attrs** or **dataclasses** for data modeling
+- **pydantic** for validation (Dessine-moi can complement conversion steps)
+- JSON serializers/deserializers
+- Configuration management frameworks
+
+This strategic integration means you can adopt Dessine-moi gradually, wrapping it around existing data ingestion pipelines to cleanly encapsulate object construction logic.
+
+
+## Real-World Use Case: Configuration-Driven Simulation Setup
+
+Imagine a scientific simulation that requires dozens of nested configurations — materials, boundary conditions, solver parameters — all represented as JSON.
+
+With Dessine-moi:
+
+1. Define *attrs* classes mirroring your configuration schema.
+2. Register these classes with a Factory, using explicit or aliased type IDs.
+3. Load JSON files and directly obtain fully typed Python objects ready for simulation.
+
+This replaces brittle manual dict unpacking and casting code, reduces errors, and accelerates your workflow from data to execution.
+
+
+## Troubleshooting Common Scenarios
+
+<AccordionGroup title="Troubleshooting Tips">
+<Accordion title="Unregistered Type Errors">
+If you receive errors that a type ID is not registered, verify that:
+
+- You have registered the class before conversion.
+- The type field value matches exactly (case sensitive).
+- Aliases are used if applicable.
+
+</Accordion>
+<Accordion title="Incorrect Object Structures">
+Ensure that the input dictionaries comply with the schema expected by your classes. Missing required keys or type fields will block conversion.
+
+</Accordion>
+<Accordion title="Lazy Type Not Found">
+Verify that module paths used in lazy types are accessible and properly spelled. Import errors during dereferencing can manifest in object creation failures.
+
+</Accordion>
+</AccordionGroup>
+
+
+## Next Steps
+
+To implement these patterns:
+
+- Begin with the [Core Concepts & Terminology](/overview/core-concepts-and-architecture/core-concepts) to solidify foundational knowledge.
+- Explore the [How Dessine-moi Works](/overview/core-concepts-and-architecture/architecture-overview) page for detailed architecture insights.
+- Experiment using [Your First Factory: Usage Example](/getting-started/first-steps/first-factory) to build your initial dynamic factory.
+- Deep dive into advanced customization via the [Customizing the Factory](/api-reference/advanced-and-integration/custom-factory-behaviors) API documentation.
+
+---
