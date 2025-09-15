@@ -1,0 +1,213 @@
+---
+title: "Upgrade & Migration Guides"
+description: "Step-by-step instructions to help users adapt existing code to new versions, covering typical migration tasks in response to breaking or deprecated features. Empowers confident, efficient upgrading."
+---
+
+# Upgrade & Migration Guides
+
+Stay confident and efficient during your Dessine-moi upgrades with this comprehensive guide focused on migrating your existing code to new versions. This page provides clear, step-by-step instructions tailored to common migration challenges arising from breaking and deprecated features, enabling you to adapt your workflows smoothly and maintain compatibility.
+
+---
+
+## Why Upgrade & Migrate?
+
+New versions of Dessine-moi bring powerful enhancements, better integration, and critical fixes — but occasionally introduce breaking changes or deprecate features. This guide helps you transform your current code base so you can leverage improvements without disruption.
+
+Through practical guidance and real scenarios, you will learn exactly what to change and how to verify your migration success.
+
+---
+
+## What You Will Achieve
+
+- Seamless adaptation of your existing object-creation workflows to new Factory APIs.
+- Clear steps for updating type registrations in response to renamed or removed parameters.
+- Confident handling of deprecated features flagged for removal.
+- Practical examples illustrating the migration from older idioms to recommended patterns.
+
+---
+
+## Typical Migration Tasks
+
+### 1. Updating Factory Registration Parameters
+
+If you used the parameter `allow_id_overwrite` in your `Factory.register()` calls, note that this has been renamed to `overwrite_id`. To migrate:
+
+```python
+# Before (older versions)
+factory.register(MyType, allow_id_overwrite=True)
+
+# After (current version)
+factory.register(MyType, overwrite_id=True)
+```
+
+*Outcome:* Your registration calls remain compatible with the latest Factory API, avoiding runtime errors.
+
+---
+
+### 2. Adapting to Python Version Support Changes
+
+Dessine-moi periodically updates the Python version support range. For example, support for Python 3.7 has been dropped starting version 23.1.0, and newer versions support Python 3.12 and 3.13.
+
+**Migration steps:**
+- Ensure your environment runs Python 3.8 or higher (preferably the latest supported version).
+- Adjust your development and deployment pipelines to use the compatible Python versions.
+
+*Tip:* Check your project's Python version with this command:
+
+```bash
+python --version
+```
+
+---
+
+### 3. Switching Project Management Tools (Developer Side)
+
+If you manage your Dessine-moi development environment, recent releases changed project tools (e.g., migrating from PDM to Rye or Rye to uv). This won't affect library usage directly but is essential for contributors.
+
+*Action:* Follow updated developer setup instructions (see Contributing guide) to align with current practices.
+
+---
+
+### 4. Handling Lazy Types and New Alias Systems
+
+Recent versions introduce enhancements like a new alias system for Factory types and improved lazy registration.
+
+To migrate:
+- Review how you register lazy types.
+- Adopt the updated alias registration API.
+
+Example migration snippet:
+
+```python
+# Old alias registration
+factory.register(MyType, alias='OldName')
+
+# Use new alias system as per latest API
+factory.register(MyType)
+factory.add_alias('OldName', MyType)
+```
+
+*Outcome:* Improved clarity and consistency in type registration across your codebase.
+
+---
+
+## Best Practices for a Smooth Upgrade
+
+- **Review release notes and breaking changes thoroughly:** Check notable changes per version in the Release Notes and Breaking Changes documentation.
+
+- **Upgrade incrementally:** Prefer upgrading one major/minor version at a time, testing each step.
+
+- **Automate tests:** Ensure you have tests that verify object creation and conversion behavior.
+
+- **Use migration examples:** Use provided code samples to shape your changes and avoid common pitfalls.
+
+- **Monitor deprecated features:** Update or remove usage of features flagged for deprecation as early as possible.
+
+- **Backup before upgrading:** Keep your existing working environment intact for rollback if needed.
+
+---
+
+## Step-by-Step Migration Example
+
+This example illustrates updating from version 22.2.0 to 25.1.0 focusing on key breaking changes you are likely to encounter.
+
+<Steps>
+<Step title="Check Current Version">
+Run to check the Dessine-moi version:
+
+```python
+import dessinemoi
+print(dessinemoi.__version__)
+```
+
+Confirm your starting version.
+</Step>
+<Step title="Update Python Environment">
+Ensure Python 3.8 or above is installed and selected.
+
+```bash
+python --version
+# Should output at least 3.8.x
+```
+</Step>
+<Step title="Adjust Factory Registration Calls">
+Search your code for any `allow_id_overwrite` parameters and replace them with `overwrite_id`.
+
+Example:
+
+```python
+# Before
+factory.register(MyType, allow_id_overwrite=True)
+
+# After
+factory.register(MyType, overwrite_id=True)
+```
+</Step>
+<Step title="Refactor Aliases">
+Transition alias registrations to the new system if applicable:
+
+```python
+factory.register(MyType)
+factory.add_alias('OldAliasName', MyType)
+```
+</Step>
+<Step title="Run Tests and Validate">
+Execute your test suite and verify that object creation, lazy loading, and dictionary conversion work correctly.
+
+If issues arise, consult troubleshooting tips within the documentation.
+</Step>
+<Step title="Finalize Upgrade">
+Update your requirements file to pin Dessine-moi at the new version.
+
+```bash
+pip install dessinemoi==25.1.0
+```
+
+Commit your changes with a clear message like: "Upgrade Dessine-moi to 25.1.0 and migrate API usage"
+</Step>
+</Steps>
+
+---
+
+## Troubleshooting Common Migration Issues
+
+<AccordionGroup title="Migration Troubleshooting">
+<Accordion title="Factory.register() TypeError or Unexpected Keyword Argument">
+Verify that you updated deprecated parameter names (e.g., `allow_id_overwrite` → `overwrite_id`). Check your installed Dessine-moi version aligns with the API expectations.
+
+Use this command to check version:
+
+```python
+import dessinemoi
+print(dessinemoi.__version__)
+```
+
+</Accordion>
+<Accordion title="Type Not Found or Unregistered Errors After Upgrade">
+Ensure your type registrations are complete and adhere to any updated registration flows, especially if you use lazy types or aliases.
+
+Check your registration code for correctness and that all modules defining types are imported.
+
+Refer to the [Registering Types] guide for best practices.
+</Accordion>
+<Accordion title="Python Version Compatibility Issues">
+Confirm your runtime uses a supported version of Python. Upgrade your environment if it falls below the minimum supported.
+
+If upgrading Python is not possible, consider sticking to the latest compatible Dessine-moi version for your environment.
+
+</Accordion>
+</AccordionGroup>
+
+---
+
+## Additional Resources
+
+- [Breaking Changes and Deprecations](./breaking-changes)
+- [Release Notes and Version History](./release-history/latest-release-notes)
+- [Registering Types and Building Object Trees](../../guides/getting-started/registering-types)
+- [Factory Basics Setup](../../guides/getting-started/factory-basics)
+- [Troubleshooting Common Issues](../../getting-started/first-usage/troubleshooting)
+
+---
+
+Empower your upgrade journey with this guide to maintain stable and future-proof usage of Dessine-moi while benefiting from evolving Python ecosystem compatibility and cutting-edge library features.
