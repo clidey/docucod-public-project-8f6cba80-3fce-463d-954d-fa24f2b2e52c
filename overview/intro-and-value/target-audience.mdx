@@ -1,0 +1,121 @@
+---
+title: "Who Should Use Dessine-moi?"
+description: "Clearly identify the target audience: Python developers needing factory patterns, especially those working with nested data (e.g., JSON), needing reliable, extensible object creation tools. Suggest practical scenarios and user profiles."
+---
+
+# Who Should Use Dessine-moi?
+
+## Unlock Dynamic Object Creation in Your Python Projects
+
+If you are a Python developer caught in the challenge of transforming deeply nested dictionaries—such as those derived from JSON documents—into well-structured Python objects, *Dessine-moi* offers a straightforward, reliable solution. This page is designed specifically for you: developers and teams who require a flexible factory pattern implementation to meet complex object construction tasks with ease and precision.
+
+---
+
+## Ideal User Profiles
+
+- **Python Developers Working with Nested Data:** Whether dealing with JSON configuration files, complex API responses, or hierarchical data structures, you need tools that can translate nested dictionaries seamlessly into Python objects.
+
+- **Software Engineers Needing Extensible Object Creation:** If your application demands dynamic object trees with customizable construction logic, *Dessine-moi* helps you create, register, and instantiate object types flexibly.
+
+- **Teams using `attrs` or Similar Data Class Libraries:** For those leveraging *attrs* to define immutable or mutable data classes, *Dessine-moi* integrates smoothly, enabling converters that automatically turn dicts into instances.
+
+- **Developers Seeking Maintainable and Scalable Factories:** You want your factory pattern to evolve as your codebase grows. *Dessine-moi* supports lazy type registration, aliases, and custom subclassing.
+
+---
+
+## Practical Scenarios Where Dessine-moi Excels
+
+### 1. Parsing and Instantiating Complex JSON Documents
+Imagine you receive a JSON document describing components, each with nested properties and types. Instead of manually parsing and writing convoluted if-else chains, *Dessine-moi* lets you register your classes and instantiate objects dynamically simply based on dictionary content.
+
+### 2. Building Configurable Systems with Plugin Behavior
+Systems that consume configuration trees with typed components—such as rendering engines, simulation setups, or data pipelines—can register component classes once and then construct entire hierarchies from dictionaries passed at runtime.
+
+### 3. Simplifying Factory Management in Large Codebases
+As your application’s number of object types grows, managing them manually becomes error-prone. *Dessine-moi* supports aliasing and lazy registration, reducing upfront import overhead and improving code clarity.
+
+---
+
+## Why Dessine-moi Is Your Reliable Choice
+
+- **Extensibility:** Easily customize factory behavior by subclassing.
+- **Flexibility:** Register classes via decorators or explicit calls, with control over constructors.
+- **Integration:** Designed for seamless use with *attrs* and compatible object patterns.
+- **Performance:** Lazy registration defers overhead, loading types only when needed.
+
+---
+
+## Common User Intent and Needs Addressed
+
+| User Intent | How Dessine-moi Delivers |
+|-------------|-------------------------|
+| Transform nested dict data into typed Python objects | Factory pattern with dict conversion and registration capabilities |
+| Avoid boilerplate code for object creation from config files | Dynamic mapping of type IDs to Python classes |
+| Maintain flexible, evolving object models | Aliases and lazy loading for type management |
+| Integrate with attrs library for clean, immutable data structures | Built-in support for attrs-compatible conversion methods |
+
+---
+
+## Getting Started Highlights for New Users
+
+If you are new to *Dessine-moi*, the simplest path forward is:
+
+1. **Create a Factory:** Instantiate the `Factory` object.
+2. **Register Your Types:** Use the `register` method, either as a decorator or direct call, to add your classes.
+3. **Create Objects Dynamically:** Use `create` or `convert` methods to generate instances from dictionaries that specify type IDs.
+
+For detailed workflows and examples, visit [Your First Factory: Usage Example](../getting-started/first-steps/first-factory).
+
+---
+
+## Tips for Success
+
+- Define a class attribute `_TYPE_ID` on your types to streamline registration.
+- Use `aliases` to support multiple type references to the same class.
+- Leverage `dict_constructor` to bind special class method constructors for dictionary input.
+- Utilize `allowed_cls` to enforce type safety during object creation.
+
+<Note>
+Even if you don’t use *attrs*, *Dessine-moi* can accommodate your plain Python classes, but attrs compatibility unlocks powerful converters.
+</Note>
+
+---
+
+## What You Should Know Before Diving In
+
+- *Dessine-moi* requires Python 3.8+.
+- It depends on the *attrs* library for conversion facilities but is not restricted to it.
+- Lazy registration helps reduce import overhead but disables some type introspection features.
+
+---
+
+## Where to Go Next
+
+Explore these essential resources to deepen your understanding and accelerate your use of *Dessine-moi*:
+
+- [Key Features at a Glance](./main-features) — Understand what *Dessine-moi* can do.
+- [Core Concepts & Terminology](../core-concepts-and-architecture/core-concepts) — Learn foundational ideas behind the factory pattern.
+- [Usage Examples](../getting-started/first-steps/first-factory) — Start coding with real examples.
+
+---
+
+## Summary
+This page is your starting point if you fit the profile of a Python developer or team that needs dynamic, extensible, and reliable factory tools to handle nested data and object creation. It defines who benefits most from *Dessine-moi*, illustrates typical scenarios, and guides you on how to move forward confidently with the library.
+
+---
+
+## Related Documentation
+
+- Product Introduction: [What is Dessine-moi?](./product-intro)
+- Features Overview: [Key Features at a Glance](./main-features)
+- Setup Guide: [Installing Dessine-moi](../../getting-started/setup/installation)
+- API Reference: [Factory Class](../../api-reference/factory-core-api/factory-class)
+
+## External Resources
+- Project Repository: [GitHub - rayference/dessinemoi](https://github.com/rayference/dessinemoi)
+- Python attrs Library: [https://www.attrs.org/](https://www.attrs.org/en/stable/)
+
+---
+
+# See also
+Visit other pages in the Introduction & Value Proposition section to build a complete picture of how *Dessine-moi* meets your needs and accelerates your projects.
