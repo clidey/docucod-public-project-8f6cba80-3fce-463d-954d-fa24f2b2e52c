@@ -1,0 +1,178 @@
+---
+title: "Validating Your Installation"
+description: "Guides the user through simple checks and test scripts to confirm that Dessine-moi is installed and operating as expected. Mentions running a basic test or import statement in a Python shell for reassurance."
+---
+
+# Validating Your Installation
+
+Ensuring that *Dessine-moi* is correctly installed and functioning is a crucial step before you dive into building factories and creating dynamic Python objects. This guide walks you through simple but effective methods to verify your setup so you can be confident in your development environment.
+
+---
+
+## 1. Quick Import Test
+
+The easiest first check is to verify that you can import the *Dessine-moi* package in your Python environment without errors.
+
+### Steps:
+
+```bash
+python
+```
+
+Then, inside the Python interpreter:
+
+```python
+import dessinemoi
+print(f'Dessine-moi version: {dessinemoi.__version__}')
+```
+
+### Expected Outcome:
+
+- No import errors occur.
+- The installed version of *Dessine-moi* prints to the console, affirming successful import.
+
+<Tip>
+If you see a `ModuleNotFoundError` or similar, check your Python environment or re-run the installation commands from the Installation guide.
+</Tip>
+
+---
+
+## 2. Running a Basic Factory Creation Test
+
+Validate that your installation can create Python objects using the factory pattern with a simple test script.
+
+### Test Script:
+
+Create a new Python file named `test_factory.py` with the following content:
+
+```python
+import dessinemoi
+import attrs
+
+# Create a factory instance
+factory = dessinemoi.Factory()
+
+# Define and register a simple attrs-based class
+@factory.register
+default=lambda: None  # helps IDEs detect decorator
+@attrs.define
+class Sheep:
+    _TYPE_ID = "sheep"
+    wool: str = attrs.field(default="soft")
+
+# Instantiate an object via the factory
+sheep_instance = factory.create("sheep", kwargs={"wool": "very soft"})
+
+print(sheep_instance)
+```
+
+### How to Run:
+
+Open your terminal and run:
+
+```bash
+python test_factory.py
+```
+
+### Expected Outcome:
+
+You should see the following output printed to the console:
+
+```
+Sheep(wool='very soft')
+```
+
+This confirms that the factory mechanism is working and able to create objects dynamically.
+
+<Tip>
+If you encounter errors about missing dependencies, ensure you have installed *attrs* and *dessinemoi* in the same environment.
+</Tip>
+
+---
+
+## 3. Verifying Installation in an Interactive Shell
+
+You can perform a lightweight validation interactively using the Python shell or an environment like IPython.
+
+### Interactive Steps:
+
+```bash
+python
+```
+
+Then input:
+
+```python
+import dessinemoi
+factory = dessinemoi.Factory()
+
+import attrs
+
+@factory.register
+@attrs.define
+class Dummy:
+    _TYPE_ID = "dummy"
+    value: int = attrs.field(default=42)
+
+obj = factory.create("dummy")
+print(obj)
+```
+
+### Expected Outcome:
+
+```
+Dummy(value=42)
+```
+
+This confirms the installer works interactively and the basic factory flow is intact.
+
+---
+
+## 4. Troubleshooting Common Issues
+
+<AccordionGroup title="Common Installation Issues & Solutions">
+<Accordion title="ModuleNotFoundError when importing dessinemoi">
+- Verify that you installed *dessinemoi* in the active Python environment.
+- If using virtual environments, ensure it is activated.
+- Reinstall with `pip install dessinemoi` or your package manager.
+</Accordion>
+<Accordion title="ImportError related to attrs">
+- Confirm that *attrs* package is installed, as *dessinemoi* depends on it.
+- Run `pip install attrs` if missing.
+</Accordion>
+<Accordion title="Factory.create() raises ValueError for unregistered types">
+- Make sure you registered the class with a correct `_TYPE_ID` or explicitly provide `type_id` during registration.
+- Use `factory.register(...)` before attempting to create.
+</Accordion>
+</AccordionGroup>
+
+---
+
+## 5. Next Steps
+
+Once you have validated your installation successfully, proceed to these key documentation to deepen your understanding and start harnessing the full power of *Dessine-moi*:
+
+- [Your First Factory: Usage Example](./first-factory) — Learn how to create and register your first types.
+- [Configuration and Setup](./configuration) — Configure your factory setup for specific needs.
+- [Common Issues and Troubleshooting](./troubleshooting) — Resolve challenges during development.
+
+<Tip>
+Keeping your environment isolated with virtual environments (venv, conda) helps avoid dependency conflicts and simplifies troubleshooting.
+</Tip>
+
+---
+
+*Dessine-moi* empowers you to build flexible factories for Python object creation. Proper installation validation ensures that your foundation is solid for creating dynamic object models effortlessly.
+
+
+---
+
+## References and Links
+
+- Installation instructions: [Installing Dessine-moi](../setup/installation)
+- First use and concepts: [Your First Factory: Usage Example](../first-steps/first-factory)
+- API reference: [Factory Class](../../api/factory-core-api/factory-class)
+- attrs library: https://www.attrs.org/
+- GitHub repository: https://github.com/rayference/dessinemoi
+
+---
