@@ -1,0 +1,219 @@
+---
+title: "Target Audience & Use Cases"
+description: "Identify the developers, data engineers, and application builders most likely to benefit from Dessine-moi. Outline common scenarios: from translating configuration files to object hierarchies, to working with APIs delivering JSON payloads."
+---
+
+# Target Audience & Use Cases
+
+## Who Should Use Dessine-moi?
+
+Dessine-moi is designed for developers, data engineers, and application builders who frequently work with nested, structured data — especially in Python environments. If your daily work involves translating complex configuration files, JSON payloads from APIs, or dynamic data trees into strongly-typed Python objects, Dessine-moi provides an elegant and efficient solution.
+
+This page helps you identify whether Dessine-moi fits your needs and shows typical use cases where it becomes invaluable.
+
+---
+
+## Why Use Dessine-moi?
+
+Imagine you are consuming a third-party API delivering deeply nested JSON data, or you need to transform complex configuration files into Python objects that your application can easily manipulate. Manually writing boilerplate code to parse and instantiate object hierarchies can be tedious, error-prone, and difficult to maintain.
+
+Dessine-moi lets you automate this process by registering your Python types in a factory and then creating fully formed object trees dynamically from dictionaries. This enables you to:
+
+- Handle complex, nested data effortlessly.
+- Avoid repetitive and fragile parsing code.
+- Decouple data representation from construction logic.
+
+With Dessine-moi, your focus remains on business logic and data modeling rather than on tedious parsing.
+
+---
+
+## Typical Users
+
+### Developers
+
+- Building Python applications that consume and process structured JSON or YAML.
+- Implementing factories to instantiate object hierarchies without hardcoding creation flows.
+- Looking for minimal, flexible tooling compatible with Python’s `attrs` library for rich data class support.
+
+### Data Engineers
+
+- Managing pipelines that involve configuration translation from raw data specs into Python object graphs.
+- Automatically converting arbitrarily nested data sources into validated, typed Python objects.
+
+### Application Builders
+
+- Creating scalable systems that rely on dynamic instantiation of domain objects from external data formats.
+- Working with APIs delivering JSON responses you want to transform into Python business objects.
+
+---
+
+## Common Scenarios & Use Cases
+
+### 1. Translating Configuration Files into Object Trees
+
+**Scenario:** Your application reads a configuration file expressed as a nested dictionary (e.g., JSON or YAML). Each section corresponds to different Python classes representing components.
+
+**How Dessine-moi Helps:**
+
+- Register all relevant classes with the factory.
+- Use the factory’s conversion method to parse the dict into a fully typed hierarchy.
+- Benefit from automatic converter support through `attrs` integration.
+
+_Example:_
+```python
+import dessinemoi
+import attrs
+
+@attrs.define
+class DatabaseConfig:
+    host: str
+    port: int
+
+@attrs.define
+class AppConfig:
+    database: DatabaseConfig
+
+factory = dessinemoi.Factory()
+factory.register(DatabaseConfig, type_id="database")
+factory.register(AppConfig, type_id="app")
+
+config_dict = {
+    "type": "app",
+    "database": {
+        "type": "database",
+        "host": "localhost",
+        "port": 5432
+    }
+}
+
+app_config = factory.convert(config_dict)
+assert isinstance(app_config, AppConfig)
+assert app_config.database.port == 5432
+```
+
+### 2. Working with APIs Delivering JSON Payloads
+
+**Scenario:** Fetching data from external services returns JSON with nested information about entities.
+
+**How Dessine-moi Helps:**
+
+- Dynamically construct domain objects from API responses.
+- Easily switch object creation strategies by registering different constructors.
+- Use lazy registration to reduce import overhead in large projects.
+
+_Example:_
+```python
+response_json = {
+    "type": "user",
+    "name": "Alice",
+    "profile": {
+        "type": "profile",
+        "age": 30
+    }
+}
+
+@attrs.define
+class Profile:
+    age: int
+
+@attrs.define
+class User:
+    name: str
+    profile: Profile
+
+factory = dessinemoi.Factory()
+factory.register(Profile, type_id="profile")
+factory.register(User, type_id="user")
+
+user_obj = factory.convert(response_json)
+assert user_obj.profile.age == 30
+```
+
+### 3. Creating Factories for Complex Object Hierarchies
+
+**Scenario:** You have complex Python class hierarchies representing business concepts that should be generated dynamically.
+
+**How Dessine-moi Helps:**
+
+- Map registry keys to corresponding classes without hardcoding class instantiation logic.
+- Customize factory behavior via subclassing for advanced conversion needs.
+- Handle subtypes and aliases conveniently in the registry.
+
+_Example:_
+```python
+@attrs.define
+class Animal:
+    species: str
+
+@attrs.define
+class Dog(Animal):
+    _TYPE_ID = "dog"
+
+@attrs.define
+class Cat(Animal):
+    _TYPE_ID = "cat"
+
+factory = dessinemoi.Factory()
+factory.register(Dog)
+factory.register(Cat)
+
+animal_data = {"type": "dog", "species": "canine"}
+dog = factory.convert(animal_data)
+assert isinstance(dog, Dog)
+```
+
+### 4. Deferred or Lazy Type Registration
+
+**Scenario:** Your project contains many potential types, but only some are instantiated depending on runtime logic, and you want to avoid importing all types upfront.
+
+**How Dessine-moi Helps:**
+
+- Register types lazily by specifying their fully qualified string names.
+- Import modules only when instantiation is attempted, optimizing startup times.
+
+---
+
+## Practical Tips
+
+- **Register early:** Define and register all types before converting dictionaries to avoid errors.
+- **Leverage aliases:** When multiple IDs should map to the same class, use aliases for flexibility.
+- **Use dict constructors:** Define and register classmethods to control object creation during conversion.
+- **Restrict allowed classes:** Narrow conversion targets with `allowed_cls` to increase safety.
+
+
+## Summary
+
+Dessine-moi fits perfectly in workflows requiring robust translation of unstructured or semi-structured data into fully-typed Python objects with little overhead. Its factory-based approach minimizes boilerplate, improves code maintainability, and integrates smoothly with Python’s modern class tooling.
+
+---
+
+## Next Steps
+
+After identifying Dessine-moi as the right tool for your needs, proceed to:
+
+- [What is Dessine-moi?](../introduction-core-concepts/what-is-dessinemoi) to understand the foundation.
+- [Quick Feature Overview](../introduction-core-concepts/quick-feature-overview) to see the main capabilities.
+- [Core Concepts & Terminology](../introduction-core-concepts/core-concepts-terminology) for essential definitions.
+
+Explore [Getting Started](../../getting-started/setup-basics/prerequisites) to set up your environment and dive into hands-on usage.
+
+---
+
+For full API details, see the [Core API Reference](../../api-reference/core-api/factory-class).
+
+
+---
+
+# Related Documentation Links
+- [What is Dessine-moi?](../introduction-core-concepts/what-is-dessinemoi)
+- [Key Features at a Glance](../introduction-core-concepts/quick-feature-overview)
+- [Core Concepts & Terminology](../introduction-core-concepts/core-concepts-terminology)
+- [Getting Started: Prerequisites and Installation](../../getting-started/setup-basics/prerequisites)
+- [API Reference](../../api-reference/core-api/factory-class)
+
+
+---
+
+<Info>
+Dessine-moi is powerful yet lightweight — ideal for developers aiming to automate object tree creation from raw data while maintaining flexibility and clarity.
+</Info>
