@@ -1,0 +1,220 @@
+---
+title: "Installation Instructions"
+description: "Step-by-step commands and directions to install Dessine-moi via PyPI and Conda. Includes instructions for upgrading, verifying installation, and tips for resolving common Python packaging issues on all major platforms."
+---
+
+# Installation Instructions
+
+This guide provides clear, step-by-step instructions to install **Dessine-moi** using the most common Python package managers: PyPI (pip) and Conda. You will also learn how to upgrade an existing installation, verify your installation success, and troubleshoot common issues across major operating systems.
+
+---
+
+## 1. Prerequisites
+
+Before installing, ensure your system meets the following requirements:
+
+- **Python Version:** 3.8 or later is required.
+- **Dependencies:** The primary dependency, `attrs`, will be installed automatically with Dessine-moi.
+- **Supported Platforms:** Installation supports Windows, macOS, and Linux.
+
+<Tip>
+Verify your Python version beforehand by running:
+
+```bash
+python --version
+```
+Ensure it returns Python 3.8 or newer.
+</Tip>
+
+---
+
+## 2. Installation Methods
+
+### 2.1 Installing via PyPI (pip)
+
+This is the recommended and most flexible method.
+
+#### Steps:
+
+<Steps>
+<Step title="Activate your Python environment">
+If you use virtual environments (highly recommended), activate it first. For example, using `venv` on Linux/macOS:
+
+```bash
+python3 -m venv env
+source env/bin/activate
+```
+
+On Windows:
+
+```powershell
+python -m venv env
+.\env\Scripts\activate
+```
+
+If you don't use virtual environments, proceed with your system Python.
+</Step>
+<Step title="Install Dessine-moi">
+Run the following command to install the latest stable version from PyPI:
+
+```bash
+pip install dessinemoi
+```
+
+This command will also install the required `attrs` library.
+</Step>
+</Steps>
+
+### 2.2 Installing via Conda
+
+If you use the Conda ecosystem, you can install Dessine-moi from the conda-forge channel.
+
+#### Steps:
+
+```bash
+conda install -c conda-forge dessinemoi
+```
+
+This ensures Dessine-moi and its dependencies are installed in your Conda environment.
+
+---
+
+## 3. Upgrading Dessine-moi
+
+To update Dessine-moi to the latest version:
+
+- Using pip:
+
+```bash
+pip install --upgrade dessinemoi
+```
+
+- Using Conda:
+
+```bash
+conda update -c conda-forge dessinemoi
+```
+
+---
+
+## 4. Verifying Installation
+
+Confirm Dessine-moi was installed correctly by checking its version:
+
+```bash
+python -c "import dessinemoi; print(dessinemoi.__version__)"
+```
+
+You should see the current version number printed without errors.
+
+<Tip>
+Another quick test is to import and instantiate a factory in Python:
+
+```python
+import dessinemoi
+factory = dessinemoi.Factory()
+print(factory)
+```
+
+If this runs without error, your installation is working.
+</Tip>
+
+---
+
+## 5. Troubleshooting Common Installation Issues
+
+### 5.1 pip Not Found or Wrong Python Version
+
+- Ensure that you are using the `pip` corresponding to Python 3.8+.
+- Run `python -m pip install dessinemoi` instead of `pip install` to be explicit.
+
+### 5.2 Permission Denied or Access Errors
+
+- Use a virtual environment to avoid system-wide permission issues.
+- On Unix-like systems, avoid using `sudo pip install` unless absolutely necessary.
+
+### 5.3 Conda Package Not Found
+
+- Make sure the conda-forge channel is added:
+
+```bash
+conda config --add channels conda-forge
+```
+
+- Update Conda to the latest version:
+
+```bash
+conda update conda
+```
+
+### 5.4 Conflicts With Other Packages
+
+- Try reinstalling in a clean virtual environment or Conda environment.
+
+### 5.5 Network Connectivity or Firewall Issues
+
+- Ensure your system can reach PyPI or Conda servers.
+- Bypass corporate firewalls or configure your proxy settings if necessary.
+
+<Warning>
+If installation fails repeatedly, please check your Python packaging environment first or consult the Python packaging documentation.
+</Warning>
+
+---
+
+## 6. Additional Tips and Best Practices
+
+- Always prefer isolated environments (virtualenv or Conda) to manage dependencies cleanly.
+- Keep your packaging tools (`pip`, `setuptools`, `wheel`) up to date:
+
+```bash
+pip install --upgrade pip setuptools wheel
+```
+
+- Check the official [Dessine-moi PyPI page](https://pypi.org/project/dessinemoi) or [conda-forge package page](https://anaconda.org/conda-forge/dessinemoi) for the latest release info.
+
+---
+
+## 7. Next Steps
+
+- After installation, proceed to configure your first factory by visiting the [Basic Configuration and Import guide](/getting-started/first-usage/basic-setup).
+- Refer to [Quick Validation Steps](/getting-started/setup-basics/validation) to confirm your setup.
+- Dive deeper into usage in the [Getting Started with Dessine-moi guides](/guides/getting-started/factory-basics).
+
+---
+
+## Summary Table of Installation Commands
+
+<CardGroup cols={2}>
+<Card title="PyPI (pip) Installation">
+```bash
+pip install dessinemoi
+```
+```bash
+pip install --upgrade dessinemoi
+```
+</Card>
+<Card title="Conda Installation">
+```bash
+conda install -c conda-forge dessinemoi
+```
+```bash
+conda update -c conda-forge dessinemoi
+```
+</Card>
+</CardGroup>
+
+---
+
+## Related Documentation
+
+- [Prerequisites and System Requirements](/getting-started/setup-basics/prerequisites)
+- [Quick Validation Steps](/getting-started/setup-basics/validation)
+- [Basic Configuration and Import](/getting-started/first-usage/basic-setup)
+- [Troubleshooting Common Setup Issues](/getting-started/first-usage/troubleshooting)
+
+---
+
+<Note>
+For more information on Python package management and environment setup, consult the official Python documentation and relevant package manager guides.
+</Note>
