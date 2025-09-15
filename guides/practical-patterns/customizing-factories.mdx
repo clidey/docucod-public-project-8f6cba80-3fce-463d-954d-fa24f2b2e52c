@@ -1,0 +1,267 @@
+---
+title: "Customizing and Extending Your Factory"
+description: "Unlock advanced control by customizing your Factory instance, including type resolution, default handling, and extensibility. This guide demonstrates how to adapt the factory to domain-specific needs as projects scale."
+---
+
+# Customizing and Extending Your Factory
+
+Unlock advanced control by customizing your Factory instance, including type resolution, default handling, and extensibility. This guide demonstrates how to adapt the factory to domain-specific needs as your projects scale or require specialized behavior.
+
+---
+
+## 1. Understanding the Need for Customization
+
+*Dessine-moi*’s default `Factory` offers powerful capabilities to register types, create objects dynamically, and convert dictionaries recursively. However, real-world projects often impose specific requirements that necessitate tailoring this behavior. Customizing your factory empowers you to:
+
+- Control how types are resolved and instantiated beyond default mappings.
+- Implement custom logic for dictionary-to-object conversion, including specialized validation or preprocessing.
+- Integrate domain-specific constructors and seamlessly support complex nested structures.
+- Extend or restrict type registrations dynamically as your application evolves.
+
+By making your factory adaptable, you ensure maintainable and scalable code when working with complex nested data or evolving domain models.
+
+---
+
+## 2. Preparing to Customize Your Factory
+
+### Prerequisites
+
+- Familiarity with creating and using a `Factory` instance.
+- Basic understanding of Python class inheritance and method overriding.
+- Awareness of your domain's data structures and conversion rules.
+
+### Expected Outcome
+
+You will learn how to subclass the `Factory` class to implement custom behaviors such as:
+
+- Overriding type resolution and object creation.
+- Defining default or fallback behaviors when unknown type IDs are encountered.
+- Enhancing conversion logic to handle special cases.
+
+This will give you a flexible factory that fits your application’s unique data flows.
+
+---
+
+## 3. Step-by-Step Customization Guide
+
+### Step 1: Subclass the Factory
+
+Start by creating a new class extending `dessinemoi.Factory`. This allows you to override its key methods.
+
+```python
+import dessinemoi
+
+class CustomFactory(dessinemoi.Factory):
+    pass
+```
+
+### Step 2: Override `create()` to Customize Object Instantiation
+
+The `create()` method is responsible for creating instances based on the registered type ID and any arguments.
+
+You may want to add custom behavior such as logging instantiations, applying domain-specific validations, or modifying constructor arguments.
+
+```python
+class CustomFactory(dessinemoi.Factory):
+    def create(self, type_id, *args, **kwargs):
+        # Example: Log creation
+        print(f"Creating instance of type '{type_id}'")
+        # Call the superclass method to perform creation
+        instance = super().create(type_id, *args, **kwargs)
+
+        # Example: Post-process instance if needed
+        # instance.custom_flag = True
+
+        return instance
+```
+
+
+### Step 3: Override `convert()` for Advanced Dictionary to Object Conversion
+
+The `convert()` method processes dictionaries that contain a "type" key and converts them into objects. Override this method to:
+
+- Change how nested dictionaries are converted.
+- Implement validation or transformation of the input data before conversion.
+- Provide fallback behavior when type IDs are missing.
+
+Example:
+
+```python
+class CustomFactory(dessinemoi.Factory):
+    def convert(self, value, *, allowed_cls=None):
+        # Add preprocessing step
+        if isinstance(value, dict):
+            if "type" not in value:
+                # Provide a default type or raise a meaningful error
+                value = {**value, "type": "default_type_id"}
+
+        # Call the original convert method
+        return super().convert(value, allowed_cls=allowed_cls)
+```
+
+
+### Step 4: Implement Custom Dict Constructor Support
+
+If your domain classes require special construction logic, implement or associate custom class methods as dict constructors.
+
+Register these custom constructors with the `dict_constructor` parameter when registering your type.
+
+```python
+import attrs
+
+@attrs.define
+class SpecialSheep:
+    color: str
+
+    @classmethod
+    def from_dictionary(cls, data):
+        # Custom constructor example
+        color = data.get("wool_color", "white")
+        return cls(color=color)
+
+factory = CustomFactory()
+factory.register(SpecialSheep, type_id="special_sheep", dict_constructor="from_dictionary")
+
+# When converting a dict, the factory will call SpecialSheep.from_dictionary to create the instance
+obj = factory.convert({"type": "special_sheep", "wool_color": "black"})
+print(obj)  # SpecialSheep(color='black')
+```
+
+
+### Step 5: Customize Type Resolution and Lazy Loading
+
+Override or extend methods to handle how types are resolved from IDs, including lazy loading or resolving aliases differently.
+
+Example of intercepting lazy type resolution:
+
+```python
+class CustomFactory(dessinemoi.Factory):
+    def _resolve_lazy(self, type_id):
+        # Custom logic before resolving
+        print(f"Resolving lazy type for '{type_id}'")
+        # Call parent implementation
+        return super()._resolve_lazy(type_id)
+```
+
+
+### Step 6: Restrict or Extend Registrations Dynamically
+
+You may want to add safeguards or policies on what can be registered or aliased.
+
+```python
+class CustomFactory(dessinemoi.Factory):
+    def register(self, cls=None, *, type_id=None, dict_constructor=None, aliases=None, overwrite_id=False, allow_lazy=True):
+        if type_id is not None and type_id.startswith("reserved_"):
+            raise ValueError(f"Type IDs starting with 'reserved_' are not allowed: {type_id}")
+        return super().register(cls, type_id=type_id, dict_constructor=dict_constructor, aliases=aliases, overwrite_id=overwrite_id, allow_lazy=allow_lazy)
+```
+
+---
+
+## 4. Practical Example: Extended Factory with Logging and Default Fallback
+
+```python
+import dessinemoi
+import attrs
+
+@attrs.define
+class Sheep:
+    wool: str = "soft"
+
+@attrs.define
+class DefaultAnimal:
+    name: str = "Unknown"
+
+class LoggingFactory(dessinemoi.Factory):
+    def create(self, type_id, *args, **kwargs):
+        print(f"[Factory] Creating '{type_id}'")
+        try:
+            return super().create(type_id, *args, **kwargs)
+        except ValueError:
+            # Provide fallback instance when type is unknown
+            print(f"[Factory] Unknown type '{type_id}', returning DefaultAnimal")
+            return DefaultAnimal(name=type_id)
+
+    def convert(self, value, *, allowed_cls=None):
+        if isinstance(value, dict) and "type" not in value:
+            # Provide a default type when none specified
+            value = {**value, "type": "sheep"}
+        return super().convert(value, allowed_cls=allowed_cls)
+
+factory = LoggingFactory()
+factory.register(Sheep, type_id="sheep")
+
+# Create known type
+animal1 = factory.create("sheep", kwargs={"wool": "curly"})
+print(animal1)  # Sheep(wool='curly')
+
+# Attempt unknown type triggers fallback
+animal2 = factory.create("dragon")
+print(animal2)  # DefaultAnimal(name='dragon')
+
+# Convert dict without type key uses default
+converted = factory.convert({"wool": "soft and thick"})
+print(converted)  # Sheep(wool='soft and thick')
+```
+
+---
+
+## 5. Tips and Best Practices
+
+- **Start Simple, Then Extend:** Begin with the default factory and add customizations only as requirements emerge.
+- **Use Custom Dict Constructors:** They provide clean encapsulation for specialized object creation logic.
+- **Leverage Aliases Carefully:** Avoid confusion by documenting aliases clearly.
+- **Validate Early:** In overridden methods, add checks for inputs to prevent silent failures.
+- **Log Strategically:** Use logging in custom factories to trace object creation and conversion, which aids debugging.
+
+---
+
+## 6. Troubleshooting Common Customization Issues
+
+<AccordionGroup title="Custom Factory Troubleshooting">
+<Accordion title="Type Registration Fails with ValueError">
+Ensure that the `type_id` you are registering is unique unless you explicitly enable `overwrite_id=True`. If overriding, confirm that your logic correctly calls the base `register` method.
+</Accordion>
+<Accordion title="Custom Constructors Not Called">
+Verify that the method name given in `dict_constructor` exists as a class method on your registered class. This method should accept a dictionary or expected parameters to construct the object.
+</Accordion>
+<Accordion title="Fallback Logic Not Triggered">
+Ensure that exceptions in `create()` are properly caught and handled. Avoid masking other exceptions that are not `ValueError` related to missing types.
+</Accordion>
+<Accordion title="Lazy Type Resolution Breaks"
+>
+If overriding lazy type resolution, be sure to call the superclass’s method and update the registry correctly to replace lazy loaders with the concrete class.
+</Accordion>
+</AccordionGroup>
+
+---
+
+## 7. Next Steps & Related Content
+
+- **Explore Factory Class API:** Deep dive into all available methods in the `Factory` class for flexibility.
+- **Master Dictionary Object Creation:** Learn advanced conversion patterns for deeply nested dictionaries.
+- **Attrs-Compatible Converters:** Integrate with attrs workflows for automatic and recursive conversion.
+- **Troubleshooting and Error Handling:** Best practices for stable and predictable usage.
+
+For full details, see the [Factory Class API](https://dessinemoi.readthedocs.io/en/latest/api-reference/factory-core-api/factory-class.html) and [Customizing the Factory](https://dessinemoi.readthedocs.io/en/latest/api-reference/advanced-and-integration/custom-factory-behaviors.html).
+
+---
+
+## 8. Summary Diagram of Factory Customization Workflow
+
+```mermaid
+flowchart TD
+    Start([Start Custom Factory Setup]) --> Subclass[Subclass dessinemoi.Factory]
+    Subclass --> OverrideCreate[Override create() method]
+    Subclass --> OverrideConvert[Override convert() method]
+    OverrideCreate --> CustomLogic[Add custom creation logic]
+    OverrideConvert --> Preprocess[Add pre/post processing of dicts]
+    CustomLogic --> RegisterTypes[Register domain-specific types]
+    Preprocess --> RegisterTypes
+    RegisterTypes --> TestFactory[Test and validate customized factory]
+    TestFactory --> Deploy[Use factory in applications]
+    Deploy --> End([End])
+
+    classDef startend fill:#f9f,stroke:#333,stroke-width:2px;
+    class Start,End startend;
+```

@@ -1,0 +1,168 @@
+---
+title: "Prerequisites and System Requirements"
+description: "Describes supported Python versions, required dependencies, and recommended setup tools. Helps users verify their environment is compatible before installation. Includes quick checks to avoid common pitfalls."
+---
+
+# Prerequisites and System Requirements
+
+Before installing and using *Dessine-moi*, ensure your system matches the following requirements and dependencies. Verifying your environment upfront saves you time and prevents common setup pitfalls.
+
+---
+
+## 1. Supported Python Versions
+
+*Dessine-moi* requires Python **3.8** or higher. It is fully compatible with the latest stable Python releases, including:
+
+- Python 3.8
+- Python 3.9
+- Python 3.10
+- Python 3.11
+- Python 3.12
+- Python 3.13
+
+Using older Python versions will lead to incompatibility errors during installation or runtime.
+
+<Tip>
+Always use an up-to-date Python environment. If you manage multiple versions, consider using `pyenv` or virtual environments to isolate installations.
+</Tip>
+
+---
+
+## 2. Required Dependencies
+
+*Dessine-moi* depends on the following external Python package:
+
+- [`attrs`](https://www.attrs.org/en/stable/): Provides class decorators and methods to simplify class creation and attribute management.
+
+This dependency is automatically installed alongside *Dessine-moi* when using `pip` or Conda.
+
+<Tip>
+If you manually manage packages or have custom environment restrictions, ensure `attrs` is installed before attempting to install *Dessine-moi*:
+
+```bash
+pip install attrs
+```
+</Tip>
+
+---
+
+## 3. Recommended Setup Tools
+
+For a smooth installation and maintenance experience, the following tools are highly recommended:
+
+- **Python virtual environments:** Use `venv`, `virtualenv`, or Conda environments to avoid polluting your global Python packages and ensure consistent dependency resolution.
+- **Package managers:**
+  - `pip` (Python's official package manager)
+  - `conda` (for users who prefer Conda environments and packages)
+
+These tools help manage dependencies cleanly and isolate projects.
+
+---
+
+## 4. Verifying Your Environment Compatibility
+
+Before proceeding with installation, perform these quick checks.
+
+### Step 1: Check Python version
+
+Open your terminal or command prompt and run:
+
+```bash
+python --version
+```
+
+You should see output like:
+
+```
+Python 3.9.7
+```
+
+If your Python version is below 3.8, upgrade before continuing.
+
+### Step 2: Verify `attrs` installation
+
+In a Python interpreter session, run:
+
+```python
+import attr
+print(attr.__version__)
+```
+
+If you get an error, install attrs using:
+
+```bash
+pip install attrs
+```
+
+<Tip>
+If you see any import errors or version mismatches, resolve them before progressing with *Dessine-moi*.
+</Tip>
+
+### Step 3: Network and Firewall Considerations
+
+Both `pip` and Conda require internet access to fetch packages. Ensure your environment allows outbound connections on the following domains and ports:
+
+- PyPI repository: `pypi.org` (port 443)
+- Conda-forge channel: `conda.anaconda.org` or `anaconda.org` (port 443)
+
+If you are behind a corporate firewall or proxy, configure your package manager accordingly.
+
+---
+
+## 5. Common Pitfalls to Avoid
+
+- **Using an unsupported Python version:** Installation will fail silently or with confusing errors.
+- **Global Python installations without virtual environments:** Can cause package conflicts.
+- **Poor network connectivity or firewall blocks:** Interrupt package downloads.
+- **Skipping `attrs` installation in custom setups:** This leads to import errors at runtime.
+
+Being mindful of these points saves troubleshooting time.
+
+---
+
+## 6. Summary Checklist
+
+- [ ] Python 3.8 or higher installed
+- [ ] `attrs` dependency installed
+- [ ] Using virtual environment or isolated setup
+- [ ] Network access for package downloads enabled
+
+For detailed installation instructions, proceed to the next guide: [Installing Dessine-moi](/getting-started/setup/installation).
+
+For a comprehensive overview of required dependencies, see the project [README](https://github.com/rayference/dessinemoi#readme).
+
+---
+
+## 7. Troubleshooting Tips
+
+If you encounter issues:
+
+- Confirm Python version with `python --version`.
+- Check if `attrs` is importable in your Python shell.
+- Recreate your virtual environment if dependency conflicts appear.
+- Use verbose pip output to diagnose installation errors:
+
+```bash
+pip install dessinemoi --verbose
+```
+
+- Consult the [Troubleshooting and Common Issues](/getting-started/first-steps/troubleshooting) page for known problems.
+
+
+---
+
+## 8. Additional Resources
+
+- [Dessine-moi on PyPI](https://pypi.org/project/dessinemoi/): Official release page.
+- [Conda-forge Dessine-moi package](https://anaconda.org/conda-forge/dessinemoi)
+- [Attrs documentation](https://www.attrs.org/en/stable/)
+
+---
+
+By ensuring your environment meets these prerequisites, you set a solid foundation for a successful *Dessine-moi* installation and usage experience.
+
+---
+
+_Last updated for Dessine-moi version 25.2.0_
+
+---

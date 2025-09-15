@@ -1,0 +1,197 @@
+---
+title: "Installing Dessine-moi"
+description: "Step-by-step guidance for installing Dessine-moi using pip and conda, with inline explanations for each method. Includes tips for virtual environments, platform-specific instructions, and best practices for fresh starts."
+---
+
+# Installing Dessine-moi
+
+This guide provides clear, step-by-step instructions to install *Dessine-moi*, a Python factory library for dynamic object creation. Whether you prefer using pip or conda, this page explains both methods with platform-specific tips and best practices to ensure a clean, error-free installation.
+
+---
+
+## 1. Prepare Your Environment
+
+Before installing, ensure your environment meets the prerequisites:
+
+- **Python Version:** 3.8 or higher
+- **Recommended:** Use a virtual environment to isolate Dessine-moi and its dependencies
+
+### Create and activate a virtual environment (optional but strongly recommended)
+
+```bash
+# On Unix or macOS
+python3 -m venv dessinemoi-env
+source dessinemoi-env/bin/activate
+
+# On Windows
+python -m venv dessinemoi-env
+dessinemoi-env\Scripts\activate
+```
+
+Using a virtual environment prevents conflicts with other Python packages on your system and is the best practice for Python project management.
+
+<Tip>
+If you’re new to virtual environments, they are lightweight sandboxes that keep your project dependencies separate, avoiding version clashes and permission issues.
+</Tip>
+
+---
+
+## 2. Installing with pip
+
+*pip* is the standard Python package installer and the recommended way to install *Dessine-moi*.
+
+### Step-by-step pip installation:
+
+<Steps>
+<Step title="Upgrade pip">
+Ensure your pip is up to date to avoid installation errors:
+
+```bash
+pip install --upgrade pip
+```
+</Step>
+<Step title="Install Dessine-moi">
+Run this command to install the latest stable version from PyPI:
+
+```bash
+pip install dessinemoi
+```
+</Step>
+<Step title="Verify Installation">
+Confirm the package installed correctly:
+
+```bash
+python -c "import dessinemoi; print(dessinemoi.__version__)"
+```
+
+You should see the version number printed without errors.
+</Step>
+</Steps>
+
+<Note>
+If you encounter permission errors, avoid using `sudo pip install`. Instead, ensure your virtual environment is activated or use the `--user` flag for a user-local installation.
+</Note>
+
+---
+
+## 3. Installing with conda
+
+If you use the Conda package manager, *Dessine-moi* is available on the conda-forge channel.
+
+### Step-by-step conda installation:
+
+<Steps>
+<Step title="Add conda-forge channel">
+First, make sure the conda-forge channel is enabled:
+
+```bash
+conda config --add channels conda-forge
+conda config --set channel_priority strict
+```
+</Step>
+<Step title="Create a conda environment (optional)">
+Isolate your setup by creating a new conda environment for Dessine-moi:
+
+```bash
+conda create -n dessinemoi-env python=3.10
+conda activate dessinemoi-env
+```
+</Step>
+<Step title="Install Dessine-moi">
+Run this command to install Dessine-moi:
+
+```bash
+conda install dessinemoi
+```
+</Step>
+</Steps>
+
+<Check>
+Verify the installation by opening Python and importing:
+
+```python
+import dessinemoi
+print(dessinemoi.__version__)
+```
+
+If the version prints without error, installation is successful.
+</Check>
+
+---
+
+## 4. Best Practices and Tips
+
+- **Start fresh:** When testing Dessine-moi, a clean environment avoids package conflicts.
+- **Check Python version:** Running `python --version` helps confirm Python 3.8+ before installation.
+- **Use virtual environments:** This is the safest approach for dependency management.
+- **Keep tools updated:** Regularly update pip (`pip install --upgrade pip`) or conda to minimize issues.
+
+<Tip>
+If you install Dessine-moi globally and run into permission issues, consider switching to a virtual environment or user-local installs.
+</Tip>
+
+---
+
+## 5. Troubleshooting Common Installation Issues
+
+<AccordionGroup title="Common Issues & Solutions">
+<Accordion title="Permission Errors with pip">
+Try installing with the `--user` flag or use a virtual environment:
+
+```bash
+pip install --user dessinemoi
+```
+
+Alternatively, create a virtual environment to isolate your setup.
+</Accordion>
+<Accordion title="Python Version Not Supported">
+Ensure you are running Python 3.8 or above:
+
+```bash
+python --version
+```
+
+Install a supported Python version if necessary.
+</Accordion>
+<Accordion title="Conda Package Not Found">
+Make sure the `conda-forge` channel is enabled and prioritized:
+
+```bash
+conda config --add channels conda-forge
+conda config --set channel_priority strict
+```
+
+Then retry installation.
+</Accordion>
+<Accordion title="Virtual Environment Activation Issues">
+On Windows PowerShell, you might need to change the execution policy:
+
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+Remember to activate your environment each new shell session.
+</Accordion>
+</AccordionGroup>
+
+---
+
+## 6. What’s Next?
+
+Once installed, proceed to:
+
+- [Configuration and Setup](/getting-started/setup/configuration) — configure Dessine-moi for your project needs.
+- [Your First Factory: Usage Example](/getting-started/first-steps/first-factory) — create and register your first types.
+- [Validating Your Installation](/getting-started/first-steps/validate-installation) — test your installation with practical examples.
+
+<Tip>
+Explore the detailed [Key Features at a Glance](/overview/intro-and-value/main-features) page to discover what you can achieve with Dessine-moi right after installation.
+</Tip>
+
+---
+
+This page anchors your journey with Dessine-moi by guiding you through clean, reliable setup methods, preparing you to dive into its powerful dynamic factory features.
+
+---
+
+*End of Installation Guide.*

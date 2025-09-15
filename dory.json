@@ -26,19 +26,19 @@
       {
         "groups": [
           {
-            "group": "Introduction \u0026 Core Concepts",
+            "group": "Introduction \u0026 Value Proposition",
             "pages": [
-              "overview/introduction-core-concepts/what-is-dessinemoi",
-              "overview/introduction-core-concepts/quick-feature-overview",
-              "overview/introduction-core-concepts/core-concepts-terminology",
-              "overview/introduction-core-concepts/who-should-use"
+              "overview/intro-and-value/product-intro",
+              "overview/intro-and-value/main-features",
+              "overview/intro-and-value/target-audience"
             ]
           },
           {
-            "group": "Architecture \u0026 Integration",
+            "group": "Core Concepts \u0026 Architecture",
             "pages": [
-              "overview/architecture-integration/system-architecture",
-              "overview/architecture-integration/integration-points"
+              "overview/core-concepts-and-architecture/core-concepts",
+              "overview/core-concepts-and-architecture/architecture-overview",
+              "overview/core-concepts-and-architecture/integration-scenarios"
             ]
           }
         ],
@@ -47,19 +47,19 @@
       {
         "groups": [
           {
-            "group": "Getting Up and Running",
+            "group": "Setup and Installation",
             "pages": [
-              "getting-started/setup-basics/prerequisites",
-              "getting-started/setup-basics/installation",
-              "getting-started/setup-basics/validation"
+              "getting-started/setup/prerequisites",
+              "getting-started/setup/installation",
+              "getting-started/setup/configuration"
             ]
           },
           {
-            "group": "Your First Factory",
+            "group": "First Use and Validation",
             "pages": [
-              "getting-started/first-usage/basic-setup",
-              "getting-started/first-usage/first-object-tree",
-              "getting-started/first-usage/troubleshooting"
+              "getting-started/first-steps/first-factory",
+              "getting-started/first-steps/validate-installation",
+              "getting-started/first-steps/troubleshooting"
             ]
           }
         ],
@@ -68,39 +68,19 @@
       {
         "groups": [
           {
-            "group": "Getting Started with Dessine-moi",
+            "group": "Core Factory API",
             "pages": [
-              "guides/getting-started/factory-basics",
-              "guides/getting-started/registering-types",
-              "guides/getting-started/dict-to-object"
+              "api-reference/factory-core-api/factory-class",
+              "api-reference/factory-core-api/type-registration",
+              "api-reference/factory-core-api/object-creation-from-dict"
             ]
           },
           {
-            "group": "Advanced Usage \u0026 Best Practices",
+            "group": "Advanced Usage \u0026 Integration",
             "pages": [
-              "guides/advanced-usage/attrs-integration",
-              "guides/advanced-usage/customizing-factories",
-              "guides/advanced-usage/performance-and-troubleshooting"
-            ]
-          }
-        ],
-        "tab": "Guides"
-      },
-      {
-        "groups": [
-          {
-            "group": "Core API",
-            "pages": [
-              "api-reference/core-api/factory-class",
-              "api-reference/core-api/type-registration",
-              "api-reference/core-api/built-in-converters"
-            ]
-          },
-          {
-            "group": "Usage Patterns \u0026 Error Handling",
-            "pages": [
-              "api-reference/usage-patterns/factory-in-action",
-              "api-reference/usage-patterns/error-handling"
+              "api-reference/advanced-and-integration/attrs-converters",
+              "api-reference/advanced-and-integration/custom-factory-behaviors",
+              "api-reference/advanced-and-integration/error-handling"
             ]
           }
         ],
@@ -109,21 +89,22 @@
       {
         "groups": [
           {
-            "group": "Release History \u0026 Highlights",
+            "group": "Getting Started",
             "pages": [
-              "changelog/release-history/latest-release-notes",
-              "changelog/release-history/version-overview"
+              "guides/getting-started/quick-start-factory",
+              "guides/getting-started/dictionary-object-creation"
             ]
           },
           {
-            "group": "Breaking Changes \u0026 Migration Guidance",
+            "group": "Practical Patterns \u0026 Real-World Scenarios",
             "pages": [
-              "changelog/breaking-changes-migration/breaking-changes",
-              "changelog/breaking-changes-migration/migration-guides"
+              "guides/practical-patterns/attrs-integration",
+              "guides/practical-patterns/customizing-factories",
+              "guides/practical-patterns/troubleshooting-common-errors"
             ]
           }
         ],
-        "tab": "Changelog"
+        "tab": "Guides"
       }
     ]
   },

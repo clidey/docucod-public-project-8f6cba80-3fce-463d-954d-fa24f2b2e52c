@@ -1,0 +1,116 @@
+---
+title: "Configuration and Setup"
+description: "Covers essential configuration workflows after installation, such as importing Dessine-moi, initializing the factory, and ensuring version correctness. Highlights any optional configuration steps for advanced users, linking to relevant API entry points."
+---
+
+# Configuration and Setup
+
+Welcome to the **Configuration and Setup** guide for *Dessine-moi*. This page walks you through essential steps to set up your environment after installation. You'll learn how to import *Dessine-moi*, initialize your factory, and verify your installation version. Additionally, we highlight optional advanced configurations for tailoring the factory to your needs through linking to key API entry points.
+
+---
+
+## 1. Importing Dessine-moi
+
+Before using *Dessine-moi*, ensure that it is properly imported into your Python environment.
+
+```python
+import dessinemoi
+```
+
+Once imported, the module exposes a default factory instance and utility functions to begin registering types and creating objects dynamically.
+
+
+## 2. Initializing Your Factory
+
+At the core of *Dessine-moi* lies the `Factory` class, which manages your mapping between string type IDs and Python classes. You need to instantiate this factory before registering types or creating objects.
+
+```python
+factory = dessinemoi.Factory()
+```
+
+This factory starts with an empty registry. Your typical next step is to register one or more Python types (classes) under string identifiers.
+
+### Registering Types
+
+Register your Python classes to the factory using:
+
+```python
+factory.register(YourClass, type_id="your_type_id")
+```
+
+Or use the `@factory.register` decorator syntax on your classes for clean, readable code.
+
+Refer to the [Your First Factory: Usage Example](../getting-started/first-steps/first-factory) page for detailed guidance on type registration and usage.
+
+## 3. Ensuring Version Correctness
+
+Confirming your *Dessine-moi* version guarantees compatibility and eases troubleshooting.
+
+Access the package version via:
+
+```python
+print(dessinemoi.__version__)
+```
+
+You can also access it through your factory instance:
+
+```python
+print(factory.release)  # or factory.version
+```
+
+This echoes the version installed in your environment, helping you verify updates or match documentation.
+
+## 4. Optional Advanced Configuration
+
+While *Dessine-moi* works out-of-the-box after basic setup, advanced users might want to customize.
+
+- **Factory Subclassing:** Create custom factories by subclassing `Factory` and overriding methods such as `convert` for specialized dictionary conversion logics.
+- **Aliases:** Assign multiple type IDs to the same class to handle different naming conventions seamlessly.
+- **Lazy Registration:** Register types by string qualified names to defer imports and speed initial loading.
+
+Explore customization options and API endpoints in the following key references:
+
+- [`Factory` Class API](../../api-reference/factory-core-api/factory-class)
+- [Type Registration and Mapping](../../api-reference/factory-core-api/type-registration)
+- [Attrs-Compatible Converters](../../api-reference/advanced-and-integration/attrs-converters)
+- [Customizing the Factory Behavior](../../api-reference/advanced-and-integration/custom-factory-behaviors)
+
+## 5. Verification and Troubleshooting Tips
+
+After configuration, perform a quick check:
+
+```python
+assert isinstance(factory, dessinemoi.Factory)
+print(f'Version: {dessinemoi.__version__}')
+```
+
+If the import or factory initialization fails:
+
+- Confirm *Dessine-moi* is installed in your current environment (`pip list | grep dessinemoi`).
+- Verify you are running Python 3.8 or higher.
+- Ensure that dependencies like `attrs` are properly installed.
+
+Consult the [Troubleshooting and Common Issues](../getting-started/first-steps/troubleshooting) page for additional help.
+
+---
+
+## Summary
+
+You are now ready to proceed confidently with *Dessine-moi*. Begin by importing and initializing your factory. Register your types, confirm your versions, and optionally explore advanced customization to tailor the factory precisely to your needs.
+
+For practical examples and next steps, navigate to your first usage guides and detailed API references.
+
+---
+
+## Additional Resources
+
+- [Getting Started: Your First Factory](../getting-started/first-steps/first-factory)
+- [API Reference: Factory Class](../../api-reference/factory-core-api/factory-class)
+- [Using Factories with attrs Classes](../../guides/practical-patterns/attrs-integration)
+- *Dessine-moi* GitHub Repository: https://github.com/rayference/dessinemoi
+
+<Check>
+Remember to keep your environment consistent and maintain your factory registry clean to avoid conflicting type IDs.
+</Check>
+
+---

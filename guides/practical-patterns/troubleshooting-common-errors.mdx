@@ -1,0 +1,207 @@
+---
+title: "Troubleshooting and Common Pitfalls"
+description: "Find solutions to frequent issues such as missing types, incorrect dictionary structure, or type resolution errors. Learn debugging techniques and best practices for error handling."
+---
+
+# Troubleshooting and Common Pitfalls
+
+Discover practical solutions to frequent issues users face when working with Dessine-moi's Factory. This guide focuses on diagnosing problems related to missing types, misconfigured dictionary inputs, and type resolution errors. We'll provide actionable debugging methods and best practices to ensure smooth, error-free dynamic object creation.
+
+---
+
+## 1. Understanding Common Error Scenarios
+
+Dessine-moi’s dynamic object factory relies on precise type registration and correctly structured inputs. Errors typically stem from:
+
+- Missing or unregistered type IDs
+- Improper dictionary structures (especially the missing or incorrect `type` key)
+- Conflicts or mistakes with aliases and lazy type resolution
+- Mismatched or restrictive type constraints during object creation
+
+Being aware of these pitfalls helps you diagnose and fix issues swiftly.
+
+---
+
+## 2. Troubleshooting Workflow Overview
+
+### Prerequisites
+
+- Confirm that your Python environment meets the minimum requirement (Python 3.8+).
+- Verify you have installed Dessine-moi correctly (see [Installation Guide](https://dessinemoi.readthedocs.io/en/latest/getting-started/setup/installation.html)).
+- Ensure your Factory instance has been properly initialized and your types registered.
+
+### Step-by-Step Diagnostic Steps
+
+<Steps>
+<Step title="Verify Type Registration">
+Check your Factory’s registry to confirm that all required types are correctly registered with unique type IDs.
+
+Example:
+```python
+print(factory.registry.keys())  # Should include your expected type strings
+```
+
+If a type is missing, register it before attempting creation or conversion:
+
+```python
+factory.register(YourClass, type_id='your_type')
+```
+
+This avoids **ValueError** when converting dictionaries or creating instances.
+</Step>
+
+<Step title="Check Dictionary Input Structure">
+Ensure dictionaries passed to the factory include a proper `type` key specifying a registered type ID.
+
+Example of valid input:
+
+```python
+{
+    "type": "sheep",
+    "wool": "thick"
+}
+```
+
+Missing or incorrect `type` keys cause conversion failures:
+
+```python
+factory.convert({"wool": "thick"})  # Raises ValueError
+```
+
+Always validate dictionary keys before conversion.
+</Step>
+
+<Step title="Confirm Allowed Type Constraints">
+If you use the `allowed_cls` parameter in `create` or `convert` to restrict types, verify your input types comply.
+
+Attempting to create or convert with an unallowed type will throw a **TypeError**:
+
+```python
+factory.create("sheep", allowed_cls=Lamb)  # Raises TypeError if 'sheep' not subtype of Lamb
+```
+
+Review your allowed type constraints to ensure they match your design intent.
+</Step>
+
+<Step title="Verify Aliases and Lazy Types">
+If you registered aliases, confirm they correctly point to existing registered types.
+
+Incorrect aliasing triggers registration errors.
+
+For lazy types registered as strings (e.g., module paths), confirm that:
+
+- The import path is valid and reachable.
+- The lazy type is resolved upon creation, updating the registry.
+
+Test lazy resolution by creating an instance and inspecting the registry entry afterward.
+</Step>
+
+<Step title="Review Registered Dict Constructors">
+If you use `dict_constructor` for custom class method initialization, verify the method name is correct and accessible.
+
+An incorrect `dict_constructor` causes ValueError during registration or conversion.
+
+Example:
+
+```python
+factory.register(YourClass, type_id="your_type", dict_constructor="from_dict")
+```
+
+Ensure `YourClass.from_dict` exists and matches expected signature.
+</Step>
+</Steps>
+
+---
+
+## 3. Practical Debugging Examples
+
+### Example 1: Missing Type Registration
+
+```python
+from dessinemoi import Factory
+factory = Factory()
+
+try:
+    obj = factory.convert({"type": "unknown"})
+except ValueError as e:
+    print(f"Error: {e}")
+# Output: Error: Type ID 'unknown' is not registered.
+```
+
+**Fix:** Register the type before converting.
+
+### Example 2: Dictionary Missing `type` Key
+
+```python
+input_dict = {"name": "Dolly", "age": 5}
+try:
+    obj = factory.convert(input_dict)
+except KeyError as e:
+    print(f"Missing key: {e}")
+```
+
+**Fix:** Include a `type` key in your dictionary to specify the object type.
+
+### Example 3: Incompatible Allowed Type
+
+```python
+class Sheep:
+    pass
+
+class Lamb(Sheep):
+    pass
+
+factory.register(Sheep, type_id='sheep')
+factory.register(Lamb, type_id='lamb')
+
+try:
+    factory.create('sheep', allowed_cls=Lamb)
+except TypeError as e:
+    print(e)  # 'sheep' does not reference allowed type <class 'Lamb'>
+```
+
+**Fix:** Remove or adjust your `allowed_cls` constraint.
+
+---
+
+## 4. Best Practices to Avoid Common Mistakes
+
+- Always register all types before creating or converting objects.
+- Include a clear `type` key in dictionaries you want to convert.
+- Use aliases prudently, avoid conflicts and ensure they map to existing types.
+- Prefer explicit `dict_constructor` methods when complex object creation is required.
+- Use lazy registration only when necessary and verify proper resolution.
+- When restricting types with `allowed_cls`, be mindful of class hierarchy.
+
+---
+
+## 5. Troubleshooting Tips
+
+<Tip>
+If you encounter unexpected errors:
+
+1. Check your factory’s registry keys and contents with `print(factory.registry)`.
+2. Log dictionary inputs before conversion.
+3. Test object creation with minimal arguments to isolate issues.
+4. Use try-except blocks to catch exceptions and print detailed error messages.
+5. Consult the `error-handling` API page for detailed error categorizations and resolutions.
+</Tip>
+
+<Warning>
+Do not attempt to convert dictionaries without type information unless you have customized the Factory conversion logic to handle such cases.
+</Warning>
+
+<Info>
+Keep your development environment updated and ensure you use a compatible version of Dessine-moi as some behaviors and error messages improve in recent releases.
+</Info>
+
+---
+
+## 6. Next Steps & Related Documentation
+
+- For type registration best practices and aliases, see [Type Registration and Mapping](https://dessinemoi.readthedocs.io/en/latest/api-reference/factory-core-api/type-registration.html).
+- To master dictionary-driven object creation, consult [Object Creation from Dictionaries](https://dessinemoi.readthedocs.io/en/latest/api-reference/factory-core-api/object-creation-from-dict.html).
+- Understand and customize error handling flows with the [Error Handling & Troubleshooting](https://dessinemoi.readthedocs.io/en/latest/api-reference/advanced-and-integration/error-handling.html) guide.
+- Review the [Installation Troubleshooting](https://dessinemoi.readthedocs.io/en/latest/getting-started/first-steps/troubleshooting.html) for environment-related problems.
+
+---
