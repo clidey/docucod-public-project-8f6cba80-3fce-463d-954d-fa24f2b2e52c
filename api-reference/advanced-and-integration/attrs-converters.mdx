@@ -1,0 +1,242 @@
+---
+title: "Attrs-Compatible Converters"
+description: "Documentation for the API facilitating integration with attrs: generate converters to seamlessly turn dictionaries into attrs-decorated objects. Demonstrates function signatures, example usage, and tips on customizing conversions for deeply nested or complex cases."
+---
+
+# Attrs-Compatible Converters
+
+## Overview
+
+This page details how *Dessine-moi* integrates seamlessly with the `attrs` library by providing convenient converters that transform dictionaries into instances of `attrs`-decorated Python classes. These converters enable effortless, automatic conversion workflows that allow users to instantiate complex, nested objects with minimal boilerplate.
+
+You will learn how to use the factory's conversion capabilities tailored for `attrs` classes, customize conversion behaviors, and handle complex or nested dictionary structures that map onto your Python data models.
+
+---
+
+## Understanding attrs-Compatible Conversion
+
+`attrs` simplifies Python class creation with declarative, concise class definitions. Leveraging this, *Dessine-moi* factories include a `convert` method that acts as a converter compatible with `attrs` conversion hooks.
+
+When used as a converter, it:
+
+- Accepts input values, which may be dictionaries describing an object.
+- Detects if the value is a dictionary containing a predefined `type` key.
+- Uses the factory to map the `type` ID to a registered `attrs`-decorated class.
+- Creates an instance of the class from the dictionary, including for nested structures.
+
+### Why use attrs-Compatible converters?
+
+This integration allows you to:
+
+- Automate hierarchical object creation from nested dictionaries.
+- Combine effortlessly with `attrs` built-in validators and converters.
+- Use `Dessine-moi` as part of an `attrs` field conversion strategy, enabling fully declarative, type-safe data parsing.
+
+
+---
+
+## How to Use `Factory.convert` as an attrs Converter
+
+### Basic Usage
+
+```python
+import attrs
+import dessinemoi
+
+factory = dessinemoi.Factory()
+
+@factory.register
+@attrs.define
+class Sheep:
+    wool: str = attrs.field(default='some')
+
+# Convert a dict describing a Sheep instance
+sheep_dict = {"type": "sheep", "wool": "thick"}
+sheep_obj = factory.convert(sheep_dict)
+print(sheep_obj)  # Sheep(wool='thick')
+```
+
+### Using with attrs Fields
+
+You can directly use the factory's `convert` method as a converter on an `attrs` field:
+
+```python
+@attrs.define
+class Farm:
+    sheep: Sheep = attrs.field(converter=factory.convert)
+
+farm_instance = Farm(sheep={"type": "sheep", "wool": "soft"})
+print(farm_instance.sheep)  # Sheep(wool='soft')
+```
+
+This makes the conversion from dict automatic when instantiating your data classes.
+
+---
+
+## Parameters and Customization
+
+The `convert` method supports:
+
+| Parameter    | Description |
+|--------------|-------------|
+| `value`      | The input value to convert. Returns unchanged if not a dictionary. |
+| `allowed_cls`| Optionally restricts conversion to particular class(es), raising an error if the result is incompatible. |
+
+### Using `allowed_cls`
+
+Restricting by `allowed_cls` ensures only compatible types are accepted. This safeguards your data models when accepting external dictionary input:
+
+```python
+# Raises TypeError because 'sheep' is not a Lamb
+factory.convert({"type": "sheep"}, allowed_cls=Lamb)
+
+# Succeeds
+factory.convert({"type": "lamb"}, allowed_cls=Lamb)
+```
+
+You can also get a ready-to-use converter function with `allowed_cls` pre-applied:
+
+```python
+lamb_converter = factory.convert(allowed_cls=Lamb)
+
+lamb_instance = lamb_converter({"type": "lamb"})
+```
+
+This pattern is useful for defining field converters that expect a specific subtype.
+
+---
+
+## Advanced Customization: Dict Constructors
+
+If your classes require specialized instantiation logic beyond simple keyword arguments, you can register a custom class method constructor with your type via the `dict_constructor` argument on registration.
+
+For example:
+
+```python
+@attrs.define
+class Sheep:
+    wool: str
+
+    @classmethod
+    def merino(cls):
+        return cls(wool="lots")
+
+# Register with custom constructor
+factory.register(Sheep, type_id="sheep", dict_constructor="merino")
+
+# Convert dict (no arguments needed because custom constructor is called)
+sheep_obj = factory.convert({"type": "sheep"})
+print(sheep_obj)  # Sheep(wool='lots')
+```
+
+Custom dict constructors allow you to bypass the standard keyword-only constructor, delivering flexibility for complex creation scenarios.
+
+---
+
+## Step-By-Step Workflow of Conversion
+
+1. **Input Detection:** receives an input value.
+2. **Value Check:** if the value is not a dict, returns unchanged immediately.
+3. **Type Resolution:** extracts the `type` key to identify the corresponding registered class.
+4. **Create Instance:** if a `dict_constructor` is specified for the class, calls it; otherwise, creates with keywords from the dictionary.
+5. **Validation:** if `allowed_cls` is provided, ensures the created instance matches the expected type.
+
+This flow supports deeply nested conversions, making *Dessine-moi* excellent for complex JSON-like structures.
+
+---
+
+## Best Practices and Tips
+
+- Always register classes with meaningful type IDs, preferably matching your domain terms.
+- Combine aliases if your data may use alternative type names.
+- Use `allowed_cls` to restrict conversion boundaries, protecting your data integrity.
+- When dealing with deeply nested dictionaries, consider registering all nested types and using recursive conversion.
+- Use custom dict constructors where your class has logic hidden behind specialized initializers.
+- Add converters to your `attrs` fields to automate dict conversions on attribute populations.
+
+<Note>
+Attrs-compatible converters require that your classes either accept only keyword arguments in the constructor or provide a matching class method constructor for dict conversion. Avoid positional-only constructors if you intend to use the factory converters directly.
+</Note>
+
+---
+
+## Common Pitfalls and Troubleshooting
+
+<Warning>
+- Forgetting to register a type before converting will raise a `ValueError`.
+- Using classes without a `_TYPE_ID` attribute and relying on decorator registration without specifying `type_id` explicitly will lead to registration errors.
+- The `dict_constructor` must point to a valid class method; incorrect names will cause errors on conversion.
+- Lazy registrations delay import: if failing to import, conversion will raise errors when called.
+</Warning>
+
+If conversion unexpectedly returns your original dictionary instead of an object:
+
+- Verify the dictionary contains the `type` key with a registered value.
+- Confirm your factory registry contains the expected type.
+
+---
+
+## Example: Complete attrs-Compatible Conversion Workflow
+
+```python
+import attrs
+from dessinemoi import Factory
+
+# Setup factory
+factory = Factory()
+
+@factory.register
+@attrs.define
+class Sheep:
+    wool: str = attrs.field(default="normal")
+
+@factory.register
+@attrs.define
+class Farm:
+    animals: list = attrs.field(factory=list, converter=lambda vals: [factory.convert(v) for v in vals])
+
+# Example input dictionary containing nested objects
+farm_data = {
+    "type": "Farm",
+    "animals": [
+        {"type": "sheep", "wool": "thick"},
+        {"type": "sheep", "wool": "soft"}
+    ]
+}
+
+# Register Farm type
+factory.register(Farm)
+
+# Convert entire dictionary into nested attrs instances
+farm_obj = factory.convert(farm_data)
+print(farm_obj)
+# Farm(animals=[Sheep(wool='thick'), Sheep(wool='soft')])
+```
+
+This example demonstrates how the factory converts nested dictionaries into a complex object graph of `attrs` instances without manual construction code.
+
+---
+
+## Related Documentation
+
+- [Factory Class and API Overview](/api-reference/factory-core-api/factory-class): Core factory operations including registration and instance creation.
+- [Type Registration and Mapping](/api-reference/factory-core-api/type-registration): How to map string IDs to your Python types.
+- [Object Creation from Dictionaries](/api-reference/factory-core-api/object-creation-from-dict): Detailed dictionary conversion mechanisms.
+- [Core Concepts & Terminology](/overview/core-concepts-and-architecture/core-concepts): Foundational ideas about factories and type mappings.
+- [Using Factories with attrs Classes](/guides/practical-patterns/attrs-integration): Practical patterns for combining Dessine-moi and `attrs`.
+
+---
+
+## Summary
+
+Attrs-compatible converters represent the integration point between *Dessine-moi*'s factory model and Python's `attrs` library, enabling dynamic, declarative object instantiation from dictionaries. By using the factory's `convert` method as a converter, you simplify complex nested data ingestion into fully-typed Python objects with minimal effort.
+
+Advance your workflows by registering all relevant types, using aliases for flexible type naming, and employing custom constructors for special initialization logic.
+
+<Check>
+Ensure your classes are registered properly with `type_id` attributes or explicit IDs.
+Utilize `allowed_cls` to maintain type safety during conversion.
+Incorporate these converters into your `attrs` classes to automate dictionary-to-object transformation.
+</Check>
+
+---
