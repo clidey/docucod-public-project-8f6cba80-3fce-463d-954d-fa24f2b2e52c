@@ -1,0 +1,294 @@
+---
+title: "attrs-integration: Converters and Automatic Object Creation"
+description: "Step-by-step instructions on leveraging Dessine-moi with Python's attrs library to automate creation of rich data classes from dictionaries. Explains creating and registering attrs-compatible converters, complete with practical examples and caveats."
+---
+
+# attrs-integration: Converters and Automatic Object Creation
+
+## Overview
+
+This guide walks you through using *Dessine-moi* alongside Python's powerful `attrs` library to automate the creation of rich, immutable data classes directly from dictionaries. You'll learn how to create and register *attrs*-compatible converters within a `Factory` and leverage them to streamline transforming nested dictionaries into typed Python objects with minimal boilerplate.
+
+## Who Should Use This Guide
+
+- Python developers who build data-driven applications using `attrs` and want to automate object instantiation.
+- Users who work with deeply nested JSON/dictionary data needing type-safe, immutable representations.
+- Anyone looking to integrate *Dessine-moi* converters as part of their data class workflows.
+
+## What You Will Achieve
+
+By the end of this guide, you will be able to:
+
+- Define and register `attrs` data classes with *Dessine-moi* factories.
+- Use the factory's conversion mechanism to convert raw dictionaries into fully-typed immutable objects.
+- Create attrs-compatible converters for use within your data class fields.
+- Understand and avoid common pitfalls when working with automatic conversion.
+
+---
+
+## Prerequisites
+
+- Python 3.8 or higher installed.
+- `attrs` library installed and familiarity with basic usage.
+- Basic understanding of *Dessine-moi* factory concepts (registration, creation).
+- *Dessine-moi* installed (via PyPI or Conda).
+
+---
+
+## Step-by-Step Instructions
+
+### 1. Define Your attrs Data Classes
+
+Start by writing your data classes using `attrs`. Use `@attrs.define` or `@attrs.frozen` to ensure immutability and keyword-only initialization:
+
+```python
+import attrs
+
+@attrs.frozen
+class Sheep:
+    _TYPE_ID = "sheep"  # Type identifier used by the factory
+    wool: str = attrs.field(default="some")
+
+@attrs.frozen
+class Lamb(Sheep):
+    _TYPE_ID = "lamb"  # Another type registered
+```
+
+**Outcome:** You have `attrs` classes ready with a `_TYPE_ID` attribute that uniquely identifies each class.
+
+
+### 2. Create and Initialize a Factory Instance
+
+Instantiate a `Factory` object that will manage type registrations and conversions:
+
+```python
+from dessinemoi import Factory
+
+factory = Factory()
+```
+
+**Outcome:** You now have a factory instance ready for type registration.
+
+
+### 3. Register Your attrs Classes with the Factory
+
+Use the factory's `register` method to add your classes. You can register types either by specifying the class or decorating it:
+
+```python
+factory.register(Sheep)  # Registers using Sheep._TYPE_ID as the ID
+factory.register(Lamb)   # Ditto
+
+# Alternatively, decorate during declaration:
+@factory.register
+@attrs.frozen
+class Ram(Sheep):
+    _TYPE_ID = "ram"
+```
+
+**Tip:**
+- The registration uses the `_TYPE_ID` attribute to map each class.
+- You can provide an explicit `type_id` if your class lacks `_TYPE_ID`.
+
+**Outcome:** Your factory registry maps type IDs (`'sheep'`, `'lamb'`, `'ram'`) to the corresponding classes.
+
+
+### 4. Use Factory.convert() to Create Objects from Dictionaries
+
+The core of automatic object creation lies in `factory.convert()`. It takes a dictionary describing your object and converts it to a matching typed class instance:
+
+```python
+sheep_dict = {"type": "sheep", "wool": "a_lot"}
+sheep_obj = factory.convert(sheep_dict)
+print(sheep_obj)  # Output: Sheep(wool='a_lot')
+```
+
+**How it Works:**
+- The dictionary must include a `type` key referencing the object's type ID.
+- Other keys are interpreted as keyword arguments passed to the class constructor.
+- If the value is not a dictionary, it is returned unchanged.
+
+**Outcome:** You automatically produce fully-typed, immutable objects from simple nested dicts.
+
+
+### 5. Creating Converters for attrs Fields
+
+You can create an *attrs* converter function from the factory to use in your *attrs* fields. This simplifies nested or complex object creation:
+
+```python
+from dessinemoi import Factory
+
+# Create a converter restricted to Lamb type
+lamb_converter = factory.convert(allowed_cls=Lamb)
+
+@attrs.frozen
+class Farm:
+    lamb: Lamb = attrs.field(converter=lamb_converter)
+
+# Example usage
+farm_instance = Farm(lamb={"type": "lamb"})
+print(farm_instance.lamb)  # Lamb() instance
+```
+
+**Best Practice:** Always restrict converters by `allowed_cls` when applicable to enforce type safety.
+
+
+### 6. Using dict_constructor for Custom Initialization
+
+Sometimes, your class may have special class method constructors to build instances from a dictionary. You can register these with the factory using the `dict_constructor` argument:
+
+```python
+@attrs.define
+class Sheep:
+    wool: str = attrs.field()
+
+    @classmethod
+    def merino(cls):
+        return cls(wool="lots")
+
+factory.register(Sheep, type_id="sheep", dict_constructor="merino")
+
+# Conversion calls the class method automatically
+sheep = factory.convert({"type": "sheep"})
+print(sheep.wool)  # "lots"
+```
+
+**Outcome:** This enables more sophisticated conversion behaviors integrated into your factory.
+
+
+### 7. Handling Nested Dictionaries Automatically
+
+If your data classes include nested attrs types registered in the factory, conversion recursively applies:
+
+```python
+@attrs.frozen
+class Pasture:
+    sheep: Sheep = attrs.field(converter=factory.convert)
+
+pasture_dict = {"sheep": {"type": "sheep", "wool": "plenty"}}
+pasture = factory.convert(pasture_dict, allowed_cls=Pasture)
+print(pasture.sheep)  # Sheep(wool='plenty')
+```
+
+**Tip:** Assign `converter=factory.convert` on nested fields to automate nested conversions.
+
+
+### 8. Verify Successful Conversion
+
+After calling `convert`, you should verify object types as expected:
+
+```python
+assert isinstance(sheep_obj, Sheep)
+assert isinstance(pasture.sheep, Sheep)
+```
+
+If a conversion fails due to unknown type or invalid data, `ValueError` or `TypeError` exceptions will be raised.
+
+---
+
+## Practical Example: Full Workflow
+
+```python
+import attrs
+from dessinemoi import Factory
+
+# Define data classes
+@attrs.frozen
+class Sheep:
+    _TYPE_ID = "sheep"
+    wool: str = attrs.field(default="some")
+
+@attrs.frozen
+class Lamb(Sheep):
+    _TYPE_ID = "lamb"
+
+# Create a factory and register classes
+factory = Factory()
+factory.register(Sheep)
+factory.register(Lamb)
+
+# Convert dictionary to object
+data = {"type": "lamb"}
+lamb_instance = factory.convert(data)
+print(lamb_instance)  # Lamb(wool='some')
+
+# Use converter in nested attrs class
+@attrs.frozen
+class Farm:
+    lamb: Lamb = attrs.field(converter=factory.convert)
+
+farm = Farm(lamb={"type": "lamb"})
+print(farm.lamb)  # Lamb(wool='some')
+```
+
+---
+
+## Common Pitfalls & Troubleshooting
+
+<AccordionGroup title="Common Issues and Solutions">
+<Accordion title="Conversion fails with ValueError: unknown type">
+This usually happens if the `type` key in the dictionary does not match any registered type ID.
+
+**Solution:**
+- Confirm that your types are registered with the correct `_TYPE_ID`.
+- Ensure the dictionary's `type` key correctly references a registered identifier.
+</Accordion>
+
+<Accordion title="convert returns input unchanged unexpectedly">
+If the input to `convert` is not a dictionary, it will be returned as-is.
+
+**Solution:**
+- Check your input; it must be a dictionary with a `type` key for conversion.
+- Use type-checking or logging to verify input structure.
+</Accordion>
+
+<Accordion title="Nested fields don't convert automatically">
+Without specifying a converter on nested `attrs.field`, nested dictionaries remain raw.
+
+**Solution:**
+- Explicitly set `converter=factory.convert` on fields representing nested registered types.
+</Accordion>
+
+<Accordion title="Custom dict_constructor not called as expected">
+If the registered `dict_constructor` is misspelled or missing, conversion will fallback.
+
+**Solution:**
+- Confirm the class method exists and matches exactly the name passed to `dict_constructor`.
+- Check for typos and method decorators (`@classmethod`).
+</Accordion>
+
+<Accordion title="Type restrictions in convert cause TypeError">
+If you restrict conversion with `allowed_cls` and the dictionary’s type ID does not correspond or is not a subtype, a `TypeError` is raised.
+
+**Solution:**
+- Confirm allowed classes match the expected types.
+- Adjust or omit restrictions for broader type acceptance.
+</Accordion>
+</AccordionGroup>
+
+---
+
+## Best Practices and Tips
+
+- Always use `_TYPE_ID` as a class attribute for clearer and consistent registration.
+- Use `factory.convert` as the converter for nested `attrs` fields to automate nested data parsing.
+- When possible, utilize `dict_constructor` for specialized initialization logic.
+- Register all relevant types with the factory before creating objects to avoid runtime errors.
+- Handle exceptions when calling `convert` to provide graceful error reporting.
+
+---
+
+## Next Steps
+
+- Explore the [Registering Types and Building Object Trees](https://dessinemoi.readthedocs.io/guides/getting-started/registering-types) guide to deepen your registration knowledge.
+- Review the [Creating Objects from Dictionaries](https://dessinemoi.readthedocs.io/guides/getting-started/dict-to-object) guide for more scenarios on dictionary conversion.
+- Check out the [API Reference](https://dessinemoi.readthedocs.io/api-reference/core-api/factory-class) for advanced customization of Factory behavior.
+
+---
+
+## Related Documentation
+
+- [Dessine-moi Usage Guide](https://dessinemoi.readthedocs.io/usage) — Basics and quickstart with factories.
+- [attrs Library Documentation](https://www.attrs.org/en/stable/) — For writing data classes.
+- [Troubleshooting Common Setup Issues](https://dessinemoi.readthedocs.io/getting-started/first-usage/troubleshooting) — If you hit roadblocks.
+
+---

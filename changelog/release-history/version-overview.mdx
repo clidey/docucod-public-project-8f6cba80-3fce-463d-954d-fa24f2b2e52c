@@ -1,0 +1,100 @@
+---
+title: "Version History Overview"
+description: "Chronologically lists all past versions, with concise highlights of each. Enables users to quickly survey the project’s evolution and identify when important changes occurred."
+---
+
+# Version History Overview
+
+This page offers a clear, chronological view of all past releases of *Dessine-moi*. It equips you with a quick way to track the evolution of the library, highlighting key improvements, new features, bug fixes, and developer-side changes. Whether you are managing upgrades, verifying compatibility, or exploring the library’s growth, this overview streamlines your understanding of *Dessine-moi*’s release history.
+
+---
+
+## Understanding the Version History
+
+The Version History page is designed for users who want to quickly survey past releases of *Dessine-moi* without diving into the full release notes or code changes. Each release entry is concise but informative, providing:
+
+- **Version Number and Release Date:** Clearly indicates when the version was published.
+- **Major Features and Enhancements:** Highlights of new capabilities or improvements added.
+- **Bug Fixes and Improvements:** Important fixes enhancing stability or performance.
+- **Developer-Focused Changes:** Notes on project management, build tools, or codebase restructuring that may impact contributors or integrators.
+
+This information helps you assess when specific features appeared and anticipate necessary migration or compatibility considerations.
+
+---
+
+## Practical Use Cases
+
+### Surveying New Capabilities
+Imagine you're evaluating whether to upgrade your project to the latest *Dessine-moi* version. The Version History gives you a quick list to scan for relevant feature introductions, such as support for new Python versions or enhancements in the factory registration system.
+
+### Planning Upgrades
+You maintain an application depending on *Dessine-moi* 22.1.0 and want to know what has changed up to the latest version. This page allows you to identify versions introducing breaking changes, deprecated features, or new supported platforms so you can plan your upgrade strategy with confidence.
+
+### Historical Reference
+As a developer, you may want to understand the evolution of *Dessine-moi*’s architecture or feature set over time. This versioned timeline offers a clean narrative of progress and development focus through the years.
+
+---
+
+## Example Entries from the Version History
+
+### Dessine-moi 25.1.0 (2025-06-25)
+- *Dessine-moi* is now available on conda-forge.
+- The "What's New?" page was renamed to "Release Notes".
+- Adds support for Python 3.13.
+
+**Developer-side:**
+- Migration from Rye to uv for project management.
+
+
+### Dessine-moi 24.1.0 (2024-02-25)
+- Adds Python 3.12 support.
+
+**Developer-side:**
+- Migrated project management from PDM to Rye.
+- Removed Nox testing and Conda development support.
+- Changed code formatting tool from Black to Ruff.
+- Dropped Copier project templating.
+
+
+### Dessine-moi 22.2.0 (2022-07-29)
+- Improvements to the `LazyType.convert()` method, enabling lazy type resolution.
+- Introduced a new alias system for the Factory.
+- Renamed the `allow_id_overwrite` parameter to `overwrite_id` in the Factory's `register` method.
+
+
+### Dessine-moi 21.1.0 (2021-06-02)
+- Initial public release.
+
+---
+
+## Best Practices and Tips
+
+- **Always review the version history before upgrading.** It offers immediate insight into compatibility and new features.
+- **Cross-reference with the latest release notes** for detailed upgrade and migration instructions.
+- **Keep an eye on developer-side changes** if you contribute to or extend *Dessine-moi*.
+- **Use semantic versioning as a guide:** Major versions may contain breaking changes, while minor and patch releases focus on features and fixes.
+
+---
+
+## Related Documentation
+
+- [Latest Release Notes](/changelog/release-history/latest-release-notes): Deep dive into the most recent version changes.
+- [Breaking Changes and Migration Guide](/changelog/breaking-changes-migration/breaking-changes): Important for safe upgrades between major versions.
+- [Factory API Reference](/api-reference/core-api/factory-class): Understand the API objects involved in many feature changes.
+- [Installation Instructions](/getting-started/setup-basics/installation): Ensure you can upgrade and install versions smoothly.
+
+---
+
+## How This Page Fits Into Your Workflow
+
+Whether you’re a developer maintaining applications that use *Dessine-moi* or a contributor tracking the project’s progress, this Version History Overview is your first port of call to:
+
+- Quickly identify when relevant features and fixes landed.
+- Align upgrade planning with your project timelines.
+- Understand the project’s developmental milestones.
+
+From here, drill down into detailed release notes or migration guides as needed.
+
+---
+
+For comprehensive details, visit the official repository [GitHub page](https://github.com/rayference/dessinemoi) or the dedicated [Release Notes](./release_notes.md) documentation.

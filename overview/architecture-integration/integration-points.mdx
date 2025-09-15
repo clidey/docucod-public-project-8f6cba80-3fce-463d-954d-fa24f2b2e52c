@@ -1,0 +1,162 @@
+---
+title: "Integration with Python Ecosystem"
+description: "Explore how Dessine-moi synergizes with attrs (dataclasses alternative), interacts with JSON/dict data, and fits into broader Python workflows. Highlight extension and customization paths."
+---
+
+# Integration with the Python Ecosystem
+
+Explore how Dessine-moi seamlessly integrates with popular Python idioms, empowering you to convert raw JSON or dictionary data into rich, typed Python objects with ease. This page focuses specifically on leveraging Dessine-moi alongside the `attrs` library (a modern alternative to dataclasses), managing standard Python data types like `dict` and JSON, and customizing behavior to fit diverse Python workflows.
+
+---
+
+## Why Dessine-moi Fits Naturally in Python Workflows
+
+Dessine-moi is designed to slot into Python projects where you process structured data — especially nested dictionaries or JSON — and want to automatically create well-typed, immutable Python objects.
+
+Many Python developers today prefer `attrs` for defining their data structures due to its simplicity and flexibility. Dessine-moi complements this choice by serving as a "factory" that can automatically instantiate these `attrs` classes from raw data, removing manual boilerplate.
+
+### What You Gain
+
+- **Smooth Integration with `attrs` Classes:** Register your `attrs` classes with Dessine-moi's factory to create instances from raw dicts effortlessly.
+- **Flexible Handling of JSON or Dict Data:** Convert incoming JSON or Python dictionaries into rich Python object trees transparently.
+- **Extensible and Customizable:** Optionally specify custom dictionary constructors or converters for specialized workflows.
+
+---
+
+## Integrating with attrs: An Idiomatic Partnership
+
+`attrs` is a widely used Python library for defining classes with automatically generated special methods like `__init__` and `__repr__`. Dessine-moi works hand-in-hand with `attrs`:
+
+- Register any `attrs` class with the factory to enable automated object construction.
+- Leverage `attrs.frozen` or `attrs.define` classes for immutable or mutable objects.
+- Use Dessine-moi's `convert` method to translate dict data directly into these classes.
+
+### Example: Registering and Using an attrs Class
+
+```python
+import attrs
+import dessinemoi
+
+@dessinemoi.register
+@attrs.frozen
+class Sheep:
+    _TYPE_ID = "sheep"
+    age: int = attrs.field()
+    name: str = attrs.field()
+
+# Create an instance from positional args
+sheep = dessinemoi.create("sheep", args=(5, "Dolly"))
+print(sheep)  # Sheep(age=5, name='Dolly')
+
+# Convert from dict data
+data = {"type": "sheep", "age": 7, "name": "Molly"}
+sheep2 = dessinemoi.convert(data)
+print(sheep2)  # Sheep(age=7, name='Molly')
+```
+
+### Custom Dict Constructors
+
+Sometimes your `attrs` classes may require special initialization beyond simply passing keyword arguments. Dessine-moi supports specifying a custom classmethod to handle dictionary-based construction.
+
+```python
+@attrs.define
+class Sheep:
+    wool: str
+
+    @classmethod
+    def merino(cls):
+        return cls(wool="lots")
+
+factory.register(Sheep, type_id="sheep", dict_constructor="merino")
+
+sheep = dessinemoi.convert({"type": "sheep"})
+print(sheep)  # Sheep(wool='lots')
+```
+
+This approach lets you seamlessly incorporate richer factory logic without losing the convenience of automatic conversion.
+
+---
+
+## Working with JSON and Dict Data
+
+At its core, Dessine-moi is optimized to transform structured JSON or nested Python dictionaries into typed Python objects defined with `attrs` or compatible classes.
+
+### User Flow: Typical Data Conversion
+
+1. **Receive JSON or dict:** For example, loading JSON from a REST API response or config file.
+2. **Pass to `factory.convert()`:** Dessine-moi accepts the dict and detects the `type` key.
+3. **Automatic type resolution:** Dispatches to the appropriate class factory method based on the registered type ID.
+4. **Object creation:** Produces fully typed Python instances, including nested objects.
+
+### Why This Matters
+
+- Removes tedious manual parsing and instantiation code.
+- Ensures your application works with fully typed and validated objects.
+- Supports nested and polymorphic data gracefully.
+
+---
+
+## Extension and Customization Paths
+
+Dessine-moi is flexible enough to adapt beyond simple `attrs` integration and dict-to-object conversion:
+
+- **Lazy Type Loading:** Use `LazyType` to defer imports of heavy or optional class modules until instantiation time — ideal for managing large projects or plugins.
+- **Type Aliasing:** Register multiple type IDs mapping to the same class for backward compatibility or domain-specific naming.
+- **Overwrite and Decorator Options:** Customize registration behavior to handle complex type hierarchies.
+
+### Example: Lazy Type Registration
+
+```python
+from dessinemoi import LazyType
+
+lazy_class = LazyType("my_module.submodule", "MyClass")
+factory.register(lazy_class, type_id="myclass")
+my_instance = factory.create("myclass")  # Loads MyClass dynamically
+```
+
+---
+
+## Best Practices and Tips
+
+- Always define `_TYPE_ID` as a unique identifier for your classes.
+- Register all types upfront, typically when your application initializes.
+- Use `convert()` when processing external JSON or dict data to ensure type safety.
+- Leverage custom dict constructors sparingly for complex initializations.
+- Employ lazy loading to reduce startup time for large codebases.
+
+---
+
+## Troubleshooting Common Pitfalls
+
+<AccordionGroup title="Common Issues with attrs and Data Conversion">
+<Accordion title="Type Not Registered Error">
+You must register your classes with the factory before creating or converting them. Forgetting registration results in a `ValueError` stating the type is unknown.
+</Accordion>
+<Accordion title="Incorrect Dict Constructor Name">
+If specifying a custom dict constructor, ensure the classmethod exists and is correctly named; otherwise, registration will raise a `ValueError`.
+</Accordion>
+<Accordion title="Conflicts on Type IDs or Aliases">
+Attempting to register or alias a type ID already in use without explicit `overwrite_id=True` will raise errors. Plan your type IDs carefully.
+</Accordion>
+</AccordionGroup>
+
+---
+
+## Next Steps
+
+Ready to dive in? Begin by:
+
+- Exploring the [Basic Configuration and Import](../getting-started/first-usage/basic-setup) to set up your environment.
+- Creating your first object trees with [Your First Object Tree](../getting-started/first-usage/first-object-tree).
+- Learning more advanced usage patterns in [attrs-integration: Converters and Automatic Object Creation](../../guides/advanced-usage/attrs-integration) for deeper customization.
+
+By mastering how Dessine-moi fits into your Python data workflows, you unlock powerful, concise, and maintainable object creation across your projects.
+
+---
+
+## See Also
+- [What is Dessine-moi?](../introduction-core-concepts/what-is-dessinemoi) — Understand the product’s core philosophy.
+- [Core Concepts & Terminology](../introduction-core-concepts/core-concepts-terminology) — Learn key terms like factory, registry, and lazy types.
+- [Factory API Reference](../../api-reference/core-api/factory-class) — Detailed factory usage.
+
+---

@@ -1,0 +1,95 @@
+---
+title: "Quick Validation Steps"
+description: "Simple commands to check that Dessine-moi is installed and can be imported correctly, including printing the package version to confirm success. Ensures users know exactly when they are ready to proceed."
+---
+
+# Quick Validation Steps
+
+Ensure your Dessine-moi installation is successful and ready to use by running a few simple commands. These quick checks validate that the package is installed correctly, can be imported in Python, and confirms the active version.
+
+---
+
+## 1. Open Your Python Environment
+
+Start your preferred Python environment — this can be a terminal-based Python shell, IPython, a notebook, or any Python interactive console where you can run commands.
+
+```bash
+python
+```
+
+
+## 2. Import Dessine-moi Package
+
+Run the following command to import the main Dessine-moi module.
+
+```python
+import dessinemoi
+```
+
+If this step completes without errors, Dessine-moi is installed and accessible in your current Python environment.
+
+<Check>
+If you see an `ImportError` or `ModuleNotFoundError`, ensure you have installed Dessine-moi correctly, possibly using a virtual environment. Refer to the Installation Instructions guide for help.
+</Check>
+
+
+## 3. Verify Dessine-moi Version
+
+Print the version string to confirm which version of Dessine-moi is installed.
+
+```python
+print(dessinemoi.__version__)
+```
+
+This should output a version number in the format `major.minor.patch`, for example, `25.1.0`.
+
+
+## 4. Confirm Default Factory Initialization
+
+Check that the default factory instance is available and ready.
+
+```python
+print(dessinemoi.factory)
+```
+
+This will display a `Factory` object with its registry (which should be empty initially).
+
+
+---
+
+## What Next?
+
+Once these steps succeed, you are guaranteed that Dessine-moi is installed and the core factory system is ready for use. You can now proceed to configure your first factory and register your types.
+
+Refer to the following guides for continuing your setup journey:
+
+- [Basic Configuration and Import](/getting-started/first-usage/basic-setup): How to set up your Factory and import it in your project.
+- [Your First Object Tree: Quickstart Example](/getting-started/first-usage/first-object-tree): Build your first object tree with Dessine-moi.
+- [Installation Instructions](/getting-started/setup-basics/installation): Detailed steps if you need to install or upgrade Dessine-moi.
+
+
+---
+
+## Troubleshooting Tips
+
+<AccordionGroup title="Common Issues and Resolutions">
+<Accordion title="ImportError: Module 'dessinemoi' Not Found">
+Make sure you have installed Dessine-moi in the Python environment you are using:
+
+```bash
+python -m pip install dessinemoi
+```
+
+Using virtual environments is recommended to avoid conflicts.
+</Accordion>
+<Accordion title="Version Output Not Displayed or Unexpected">
+Check that you imported the package correctly and avoid name collisions with other modules named 'dessinemoi'. Use `pip show dessinemoi` to confirm the installed version.
+</Accordion>
+<Accordion title="Factory Object Not Found or Empty Registry">
+Confirm you are using the default factory instance provided by Dessine-moi. An empty registry is normal before registering any types.
+</Accordion>
+</AccordionGroup>
+
+<Tip>
+Successfully running these commands means you can confidently move forward with further usage, knowing that your environment supports Dessine-moi.
+</Tip>

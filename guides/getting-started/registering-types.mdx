@@ -1,0 +1,256 @@
+---
+title: "Registering Types and Building Object Trees"
+description: "How to make your custom classes known to the Factory so they can be constructed from dictionary inputs. Walks through registering types, organizing them for complex structures, and verifying their registration within your factory."
+---
+
+# Registering Types and Building Object Trees
+
+This guide explains how to make your custom Python classes known to the *Dessine-moi* Factory. By registering your classes with the factory, you enable the dynamic creation of instances from dictionaries, facilitating powerful workflows like constructing complex nested object trees from plain data.
+
+---
+
+## What You'll Learn
+
+- How to register your classes with the factory, enabling the factory to instantiate them from dictionary inputs.
+- Organizing your registrations with type identifiers and aliases to handle complex structures.
+- Verifying successful registration and understanding key factory concepts around registration.
+
+---
+
+## Prerequisites
+
+Before proceeding, ensure you have the following:
+
+- Python 3.8 or higher installed.
+- The `dessinemoi` package installed.
+- Basic familiarity with Python classes.
+- An understanding of the factory pattern and dictionary-driven object construction (covered in earlier guides).
+
+---
+
+## Expected Outcome
+
+By the end of this guide, you will:
+
+- Have your custom Python classes registered with a factory instance.
+- Understand how to alias types and register with custom IDs.
+- Be able to instantiate your registered types dynamically using the factory, including nested object trees.
+
+---
+
+## Time Estimate
+
+This workflow should take about 10-20 minutes depending on familiarity with Python class declarations.
+
+---
+
+## Difficulty Level
+
+Intermediate – assumes basic Python skills and object-oriented concepts.
+
+---
+
+## Step-by-Step Instructions
+
+<Steps>
+<Step title="Create or obtain a Factory instance">
+Begin by importing `dessinemoi` and creating a factory instance. This is your registry and constructor manager.
+
+```python
+import dessinemoi
+
+factory = dessinemoi.Factory()
+
+print(factory)  # Should show an empty registry
+```
+
+Upon creation, your factory has an empty registry, ready for your types.
+</Step>
+
+<Step title="Define your custom classes to be registered">
+Create the Python classes you want the factory to instantiate dynamically. Using the `attrs` library simplifies this, but it's not mandatory.
+
+```python
+import attrs
+
+@attrs.define
+class Sheep:
+    wool = attrs.field(default="some")
+
+@attrs.define
+class Lamb(Sheep):
+    _TYPE_ID = "lamb"
+```
+
+*Note*: Adding a `_TYPE_ID` class attribute helps when registering your class as a decorator.
+</Step>
+
+<Step title="Register classes individually with unique type IDs">
+Use the factory's `.register()` method to declare your class with a chosen string identifier.
+
+```python
+factory.register(Sheep, type_id="sheep")  # Registers 'Sheep' with ID 'sheep'
+```
+
+You can also register by decorating your class. If you omit `type_id`, the factory uses the `_TYPE_ID` class attribute automatically.
+
+```python
+@factory.register
+@attrs.define
+class Lamb(Sheep):
+    _TYPE_ID = "lamb"
+```
+
+*Tip*: The decorator `@factory.register` should be the last decorator (top of the stack) for consistent behavior.
+
+*Important*: By default, the factory prevents overwriting existing type IDs unless you explicitly set `overwrite_id=True`.
+</Step>
+
+<Step title="Create aliases to map multiple IDs to the same class">
+Sometimes you may want several type IDs to refer to the same class. Use `.alias()`:
+
+```python
+factory.alias("sheep", "mouton")
+```
+
+This means both "sheep" and "mouton" will create instances of the `Sheep` class.
+
+Alternatively, specify aliases during registration:
+
+```python
+factory.register(Sheep, type_id="sheep", aliases=["mouton"])
+```
+
+*Warning*: Aliasing a non-registered ID or aliasing over an existing ID raises an error.
+</Step>
+
+<Step title="Verify your registry contents">
+Inspect the factory's registry to confirm your types are properly registered.
+
+```python
+print(factory.registry)
+```
+
+You should see mappings from your `type_id` strings to a registry entry with the class included.
+
+For example:
+
+```python
+{'sheep': FactoryRegistryEntry(cls=<class '__main__.Sheep'>, dict_constructor=None),
+ 'lamb': FactoryRegistryEntry(cls=<class '__main__.Lamb'>, dict_constructor=None),
+ 'mouton': FactoryRegistryEntry(cls=<class '__main__.Sheep'>, dict_constructor=None)}
+```
+</Step>
+
+<Step title="Instantiate your registered classes through the factory">
+Use `.create()` to instantiate classes by their type ID, optionally passing constructor arguments.
+
+```python
+merino = factory.create("sheep", kwargs={"wool": "lots"})
+print(merino)  # Sheep(wool='lots')
+```
+
+You can also specify which class constructors to allow using `allowed_cls` to enforce strict type creation.
+
+Cascade creation by registering nested types and then creating complex object trees from hierarchical dicts (covered in linked guides).
+</Step>
+
+</Steps>
+
+---
+
+## Real-World Example
+
+```python
+import attrs
+import dessinemoi
+
+factory = dessinemoi.Factory()
+
+@factory.register(type_id="sheep")
+@attrs.define
+class Sheep:
+    wool = attrs.field(default="some")
+
+@factory.register
+@attrs.define
+class Lamb(Sheep):
+    _TYPE_ID = "lamb"
+
+factory.alias("sheep", "mouton")
+
+# Instantiate by type ID
+sheep = factory.create("mouton", kwargs={"wool": "extra thick"})
+lamb = factory.create("lamb")
+
+print(sheep)  # Outputs: Sheep(wool='extra thick')
+print(lamb)   # Outputs: Lamb(wool='some')
+```
+
+This example shows type registration through both decorator and method call styles, aliasing, and dynamic creation with arguments.
+
+---
+
+## Tips and Best Practices
+
+- **Use descriptive and unique type IDs** to avoid collisions in the registry.
+- Declare `_TYPE_ID` attributes in classes to simplify decorator registration.
+- Use `aliases` to maintain backward compatibility or map common synonyms.
+- Always check your registry after registration for correctness.
+- Protect against unintended overwrites by default; enable `overwrite_id` only deliberately.
+- Consider registering dict constructors for custom instantiation logic.
+- For large projects, organize registrations in dedicated modules to maintain clarity.
+
+---
+
+## Troubleshooting
+
+<AccordionGroup title="Common Issues During Registration">
+<Accordion title="Type ID Already Registered">
+If you attempt to register a type ID already in use without setting `overwrite_id=True`, registration will fail with a `ValueError`.
+
+**Solution:** Use a unique `type_id` or explicitly set `overwrite_id=True` if you mean to replace the existing registration.
+</Accordion>
+
+<Accordion title="Aliasing Non-Existent Types">
+Creating an alias for a type ID not in the registry raises a `ValueError`.
+
+**Solution:** Ensure the original type ID is registered before adding aliases.
+</Accordion>
+
+<Accordion title="Incorrect Decorator Usage">
+Not placing `@factory.register` as the last decorator may cause registration issues.
+
+**Solution:** Always place `@factory.register` at the top in decorator chains.
+</Accordion>
+
+<Accordion title="Missing Type ID for Registration Decorator">
+If you use the decorator form without providing `type_id` and your class does not have `_TYPE_ID`, registration fails.
+
+**Solution:** Add a `_TYPE_ID` attribute or register explicitly with `type_id`.
+</Accordion>
+
+</AccordionGroup>
+
+---
+
+## Next Steps
+
+- Explore the [Creating Objects from Dictionaries](https://dessinemoi.readthedocs.io/en/latest/guides/getting-started/dict-to-object) guide to learn how to use your registered classes with dictionary inputs to build object trees.
+- Dive deeper into [attrs Integration: Converters and Automatic Object Creation](https://dessinemoi.readthedocs.io/en/latest/guides/advanced-usage/attrs-integration) for streamlined workflows with `attrs`.
+- Consult the [API Reference for Factory](https://dessinemoi.readthedocs.io/en/latest/api-reference/core-api/factory-class) for detailed method signatures and parameters.
+
+---
+
+## References
+
+- [Dessine-moi Overview and Core Concepts](https://dessinemoi.readthedocs.io/en/latest/overview/introduction-core-concepts/core-concepts-terminology)
+- [Basic Factory Setup and Usage](https://dessinemoi.readthedocs.io/en/latest/guides/getting-started/factory-basics)
+- [Troubleshooting Common Setup Issues](https://dessinemoi.readthedocs.io/en/latest/getting-started/first-usage/troubleshooting)
+
+---
+
+This guide empowers you to unlock *Dessine-moi*'s potential by registering your types seamlessly with the factory, enabling powerful, dictionary-driven instantiation workflows.
+
+
+---

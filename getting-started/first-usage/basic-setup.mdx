@@ -1,0 +1,200 @@
+---
+title: "Basic Configuration and Import"
+description: "Guides users through their first import of the package, introduces the main Factory object, and covers any one-time config steps. Emphasizes what is required to start using the core features."
+---
+
+# Basic Configuration and Import
+
+Welcome to your first step in using *Dessine-moi*, a Python factory library designed to simplify creating Python objects dynamically from nested dictionaries. This guide walks you through importing the package, understanding the core Factory object, and completing the one-time setup required to begin working with Dessine-moi’s core features.
+
+---
+
+## 1. Installing Dessine-moi (Prerequisite)
+If you haven't installed Dessine-moi yet, please refer to the [Installation Instructions](https://dessinemoi.readthedocs.io/en/latest/getting-started/setup-basics/installation.html). Use `pip` or Conda in a Python 3.8+ environment:
+
+```bash
+python -m pip install dessinemoi
+# or
+conda install -c conda-forge dessinemoi
+```
+
+<Tip>
+Use a virtual environment to isolate your project dependencies and avoid package conflicts.
+</Tip>
+
+---
+
+## 2. Importing Dessine-moi
+
+Start by importing the main package and leveraging its built-in default factory instance.
+
+```python
+import dessinemoi
+
+# Access the default Factory instance
+factory = dessinemoi.factory
+print(factory)  # Should confirm an empty registry
+```
+
+The `factory` object is your gateway to registering types, creating instances, and converting dictionaries into typed objects.
+
+---
+
+## 3. Understanding the Factory Object
+
+`Factory` is the core class managing:
+
+- A **registry** mapping string type IDs to Python classes
+- Methods to register types, create instances, and convert dictionary data
+
+You can create your own `Factory` instance if you prefer isolation or advanced setups:
+
+```python
+from dessinemoi import Factory
+
+custom_factory = Factory()
+```
+
+But the default `factory` instance is fully functional for most use cases.
+
+---
+
+## 4. One-Time Configuration: Registering Types
+
+Before creating objects, you must register the Python classes you want the factory to instantiate.
+
+### Registering a Class
+Use `factory.register()` either as a method or a decorator.
+
+```python
+import attrs
+
+@factory.register
+@attrs.define
+class Sheep:
+    _TYPE_ID = 'sheep'
+    wool: str = 'some'
+```
+
+- The class must declare a unique `_TYPE_ID` attribute to serve as its registry key unless you explicitly provide `type_id`.
+
+- Registering binds the class inside the factory's registry, enabling creation and conversion.
+
+<Tip>
+Registering using the decorator syntax is the cleanest way and ensures the class is immediately ready for the factory.
+</Tip>
+
+### Registering with Explicit `type_id`
+```python
+@factory.register(type_id='lamb')
+@attrs.define
+class Lamb:
+    wool: str = 'soft'
+```
+
+### Aliases
+You can also assign additional aliases for a type during registration:
+
+```python
+factory.register(Sheep, type_id='sheep', aliases=['mouton', 'oveja'])
+```
+
+This way, multiple keys instantiate the same class.
+
+---
+
+## 5. No Other One-Time Config Needed
+At this stage, Dessine-moi requires no further one-time setup:
+
+- The factory is ready.
+- Types are registered.
+- You can proceed to create instances or convert dictionary data.
+
+This minimal initial configuration reduces barriers to productivity.
+
+---
+
+## 6. Best Practices and Tips
+
+- **Use `attrs` for your classes**: While not mandatory, `attrs` provides immutable and type-friendly Python classes that integrate smoothly.
+- **Keep `_TYPE_ID` unique**: Duplicate keys cause registration errors unless you explicitly allow overwrites.
+- **Register before creating**: Types must be registered before you call `factory.create` or `factory.convert`.
+- **Utilize aliases thoughtfully**: Aliases simplify multi-language or legacy key support but track them carefully.
+
+---
+
+## 7. Troubleshooting Common Setup Issues
+
+<AccordionGroup title="Troubleshooting Basic Configuration">
+<Accordion title="Factory object not found or AttributeError on import">
+Make sure you have Dessine-moi installed in your current Python environment.
+
+Run:
+
+```bash
+python -m pip show dessinemoi
+```
+
+If not installed, install it as instructed above.
+</Accordion>
+<Accordion title="Registering a class without `_TYPE_ID` and no `type_id` argument">
+Dessine-moi requires a type identifier to register a class. Provide either the class attribute `_TYPE_ID` or pass `type_id` explicitly during registration.
+
+```python
+factory.register(MyClass, type_id='myclass')
+```
+
+Or add `_TYPE_ID = 'myclass'` to the class.
+</Accordion>
+<Accordion title="Duplicate type identifier error on registration">
+Avoid registering two different classes with the same type ID without setting `overwrite_id=True`. This prevents accidental overrides.
+
+If intentional, specify:
+
+```python
+factory.register(OtherClass, type_id='myclass', overwrite_id=True)
+```
+</Accordion>
+</AccordionGroup>
+
+---
+
+## 8. Next Steps
+
+With the factory configured and your first types registered, you are ready to:
+
+- [Create your first object tree using your registered types](https://dessinemoi.readthedocs.io/en/latest/getting-started/first-usage/first-object-tree.html).
+- Explore dictionary-to-object conversion with [`factory.convert()`](https://dessinemoi.readthedocs.io/en/latest/guides/getting-started/dict-to-object.html).
+- Learn how to register complex types and handle lazy registration.
+
+
+
+---
+
+## Summary
+This page has walked you through importing Dessine-moi, exploring the main Factory object, and performing the essential one-time configuration by registering your first types. You now have a factory ready to create rich Python objects from simple dictionaries.
+
+---
+
+## References
+- [Introduction & Core Concepts > What is Dessine-moi?](../overview/introduction-core-concepts/what-is-dessinemoi)
+- [Installation Instructions](../getting-started/setup-basics/installation)
+- [First Object Tree Example](../getting-started/first-usage/first-object-tree)
+- [Registering Types Guide](../guides/getting-started/registering-types)
+- [API Reference > Factory](../api-reference/core-api/factory-class)
+
+
+---
+
+## Additional Help
+Join the discussion or report issues at the [GitHub repository](https://github.com/rayference/dessinemoi), or consult the detailed Troubleshooting guide for common setup issues.
+
+
+---
+
+Happy coding with Dessine-moi! 
+
+---
+
+*"S'il vous plaît, dessine-moi un mouton."*
+

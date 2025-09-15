@@ -1,0 +1,164 @@
+---
+title: "Core Concepts & Terminology"
+description: "Define and explain the crucial terms—such as 'factory', 'type registration', 'converter', and 'attrs compatibility'—central to working effectively with Dessine-moi."
+---
+
+# Core Concepts & Terminology
+
+Explore the essential terms that form the foundation of working effectively with *Dessine-moi*. Understanding these core concepts equips you to harness the power of the factory pattern implemented in *Dessine-moi*, enabling dynamic and flexible object creation from nested dictionaries.
+
+---
+
+## Factory
+
+At the heart of *Dessine-moi* lies the **Factory**, a Python object responsible for managing type creation dynamically.
+
+- **What it is:** A `Factory` is an object holding a "registry" that maps type identifiers (string IDs) to Python classes.
+- **What it does:** It allows you to register types (classes) and then create instances of these types by referencing their IDs. This means you can transform simple dictionary-based data into full-fledged Python objects on the fly.
+
+### Why it matters
+
+Imagine you have nested dictionary data representing your domain objects (e.g., animals, geometries, configurations). The factory gives you a unified way to register and instantiate these objects dynamically without hardcoding class constructors.
+
+### How it works
+
+```python
+import dessinemoi
+factory = dessinemoi.Factory()
+
+# Register a class
+@factory.register(type_id='sheep')
+class Sheep:
+    def __init__(self, wool='some'):
+        self.wool = wool
+
+# Create an instance
+merino = factory.create('sheep', kwargs={'wool': 'lots'})
+print(merino.wool)  # Output: lots
+```
+
+---
+
+## Type Registration
+
+**Type registration** is the process of associating a Python class with a string ID in the factory registry.
+
+- You register classes so that the factory knows how to create instances from specific type IDs.
+- Registration can be done explicitly using `factory.register(MyClass, type_id='my_id')` or as a decorator `@factory.register`.
+- Registered types can also have aliases — alternative IDs that point to the same class.
+- Overwriting an existing ID is disabled by default, preventing accidental conflicts unless explicitly allowed.
+
+### Practical tip
+
+Use type registration to keep your factory aware of all the object classes you expect to create. This is the essential step before you can convert dictionaries or create objects dynamically.
+
+---
+
+## Converter
+
+*Dessine-moi* offers a built-in **converter** mechanism that integrates with the popular [attrs](https://www.attrs.org/) library.
+
+- **Purpose:** To map input dictionaries into instances of registered classes seamlessly.
+- **How it works:** When converting a dictionary, *Dessine-moi* looks for a special `type` key to figure out which class to instantiate using the factory.
+- **Behavior:**
+  - If the input is not a dictionary, the converter returns it unchanged.
+  - If it is a dictionary and the `type` key matches a registered ID, it creates an instance of that class, passing dictionary values as constructor parameters.
+
+### Example
+
+```python
+config = {'type': 'sheep', 'wool': 'thick'}
+sheep_obj = factory.convert(config)
+print(sheep_obj)  # Sheep instance with wool='thick'
+```
+
+Converters provide an automatic and Pythonic way to parse nested data into structured objects, especially when working with *attrs*-declared classes.
+
+---
+
+## Attrs Compatibility
+
+*Dessine-moi* is designed to work harmoniously with the **attrs** library, which simplifies class creation with minimal boilerplate.
+
+- The factory uses the concept of converters compatible with *attrs* to automate object creation from dictionary data.
+- When registering an *attrs* class, you can optionally specify a **dict constructor** — a class method to be used for construction from dictionary data instead of the normal constructor.
+- This enhances flexibility, allowing you to define special construction logic fitting your domain.
+
+### Example using dict_constructor
+
+```python
+import attrs
+
+@attrs.define
+class Sheep:
+    wool: str = 'some'
+
+    @classmethod
+    def merino(cls):
+        return cls(wool='lots')
+
+factory.register(Sheep, type_id='sheep', dict_constructor='merino')
+sheep_obj = factory.convert({'type': 'sheep'})
+print(sheep_obj.wool)  # Output: lots
+```
+
+This shows how the factory can respect your custom classmethod construction strategies.
+
+---
+
+## Lazy Registration
+
+**Lazy registration** defers the actual import and loading of types until they are instantiated.
+
+- Useful when you want to avoid importing all classes upfront, saving startup time or avoiding circular imports.
+- You register types by passing their fully qualified name as a string (e.g., `'module.submodule.ClassName'`).
+- The factory will only import the class upon creation, updating the registry afterward.
+
+### How it looks in practice
+
+```python
+factory.register('datetime.datetime', type_id='datetime')
+```
+
+`datetime.datetime` is not imported immediately but loaded when `create('datetime')` is called.
+
+---
+
+## Summary
+
+These core concepts and terminology are fundamental to leveraging *Dessine-moi* for dynamic object creation:
+
+| Term               | Description                                                   |
+|--------------------|---------------------------------------------------------------|
+| Factory            | Central object managing type registrations and creations     |
+| Type Registration  | Process of associating a class to a type ID in the factory   |
+| Converter          | Mechanism to convert dictionaries seamlessly into instances   |
+| Attrs Compatibility| Support for classes defined with attrs and optional dict constructors |
+| Lazy Registration  | Deferring type import until instantiation                      |
+
+Mastering these terms will empower you to register customized classes in your factory, convert nested raw data into rich objects, and optimize your application's performance and modularity.
+
+---
+
+## Further Reading
+
+- See the [Usage Guide](../../usage) to learn how to register types and use factories in practice.
+- Dive into the [API Reference](../../api) for detailed method descriptions.
+- Explore the [Quick Feature Overview](../../overview/introduction-core-concepts/quick-feature-overview) for a concise feature summary.
+
+<CardGroup cols={2}>
+<Card title="Usage Guide">
+Learn how to use factories, register types, and convert dictionaries.
+
+[Go to Usage Guide](/docs/usage)
+</Card>
+<Card title="API Reference">
+In-depth reference for Factory, LazyType, and RegistryEntry.
+
+[Go to API Reference](/docs/api)
+</Card>
+</CardGroup>
+
+<Tip>
+Start by registering your classes to a factory and then create instances dynamically or convert nested input data seamlessly.
+</Tip>

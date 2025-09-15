@@ -1,0 +1,168 @@
+---
+title: "Architecture Overview"
+description: "A visual and narrative walkthrough of Dessine-moi’s architecture: the central Factory, dynamic type registration, and creation pipeline. Includes a Mermaid diagram to illustrate the major components and their flow."
+---
+
+# Architecture Overview
+
+## Unlocking the Power of Dynamic Object Creation with Dessine-moi
+
+Welcome to the **Architecture Overview** of *Dessine-moi*. Here, you will get an insightful, visual, and narrative walkthrough of the core architecture that empowers Dessine-moi to dynamically construct Python object hierarchies from nested dictionaries — the heart of its factory design.
+
+This section focuses on the pivotal role of the **Factory**, its dynamic type registration system, and the object creation pipeline. Together, these elements transform raw nested data into fully-formed Python objects, enabling a fluid and scalable development experience.
+
+---
+
+### The Core of Dessine-moi: The Factory
+
+At the center of Dessine-moi’s architecture lies the **Factory** — a versatile and dynamic Python object creator. It’s more than just a constructor: it’s a registry, a type manager, and an orchestrator, designed to empower developers to configure how their objects are constructed from dictionaries.
+
+**Why the Factory matters:**
+- It registers Python classes using identifiers called **type IDs**.
+- It creates object instances on-demand, based on those type IDs.
+- It supports lazy loading to optimize performance by deferring type imports until they are actually needed.
+- It handles dictionary conversion with built-in rules, making object creation from nested data effortless.
+
+
+### How It Works: The Object Creation Pipeline
+
+Imagine you have a dictionary describing a complex nested structure — like a JSON configuration or API payload. Here is how Dessine-moi’s factory brings it to life:
+
+1. **Type Registration:**  Classes are registered with the factory under human-readable IDs.
+2. **Type Resolution:** On creation, the factory locates the class associated with the requested type ID. If lazy registration is used, the type is imported dynamically here.
+3. **Instantiation:** The factory calls the constructor or a designated factory method (`dict_constructor`) to build the object.
+4. **Nested Conversion:** If dictionary values themselves contain other typed dictionaries, the factory recursively converts those into objects.
+
+This pipeline enables developers to effortlessly map complex, nested data structures onto Python objects with minimal boilerplate, accelerating development and improving maintainability.
+
+---
+
+### Key Components and Their Roles
+
+Below is a breakdown of the major building blocks within Dessine-moi’s architecture:
+
+- **Factory Registry:** A dictionary mapping each registered type ID to a record containing the Python class and optional custom constructor information.
+- **Type IDs:** Unique string identifiers used to look up and instantiate the corresponding class.
+- **LazyType:** A special placeholder representing a type that is yet to be imported, allowing deferment of module loading until actual use.
+- **Factory Methods:** Custom constructors tied to types that allow flexible instantiation strategies beyond default constructors.
+
+---
+
+### Visualizing the Flow
+
+The following Mermaid diagram illustrates the high-level architectural flow of Dessine-moi’s core Factory system, showing how type registration, lazy loading, and object creation interconnect.
+
+```mermaid
+flowchart TD
+
+  Factory["Factory"] --> Registry["Registry (type ID → class mapping)"]
+
+  Registry -->|Lookup| Type["Python Type"]
+  Registry -->|May hold| LazyType["LazyType (deferred import)"]
+
+  subgraph LazyTypeLoading ["Lazy Loading Process"]
+    direction TB
+    LazyType --> Import["Import Actual Class"]
+    Import --> UpdateRegistry["Update Registry with Actual Class"]
+  end
+
+  Factory -->|create(type_id)| ObjectCreation["Instantiate Object"]
+  ObjectCreation --> Instance["Python Object Instance"]
+
+  Instance -->|Nested dict?|
+  NestedConversion["Recursively convert nested dicts"]
+  NestedConversion --> Instance
+
+  Factory -->|convert(dict)| DictConversion["Convert dict with 'type' to object"]
+  DictConversion --> Factory
+
+  FactoryRegistryEntry["FactoryRegistryEntry\n(cls, dict_constructor)"]
+  Registry --> FactoryRegistryEntry
+
+  %% Style
+  classDef lazy fill:#f9f,stroke:#333,stroke-width:2px;
+  class LazyType lazy;
+
+```
+
+---
+
+### Practical Example Workflow
+
+1. **Define and Register Types:**
+
+```python
+import dessinemoi
+import attrs
+
+factory = dessinemoi.Factory()
+
+@factory.register(type_id="sheep")
+@attrs.define
+class Sheep:
+    wool: str = "some"
+
+@factory.register
+@attrs.define
+class Lamb(Sheep):
+    _TYPE_ID = "lamb"
+```
+
+2. **Create an Object from a Type ID:**
+
+```python
+merino = factory.create("sheep", kwargs={"wool": "lots"})
+# merino is a Sheep instance with wool='lots'
+```
+
+3. **Convert a Nested Dictionary into an Object Tree:**
+
+```python
+nested_dict = {
+    "type": "sheep",
+    "wool": "fine",
+    "offspring": {
+        "type": "lamb",
+        "wool": "very fine"
+    }
+}
+
+sheep_obj = factory.convert(nested_dict)
+# sheep_obj is a Sheep object with an offspring attribute as Lamb
+```
+
+This flow shows powerful abstraction from raw data directly to Python objects — no manual parsing or boilerplate needed.
+
+---
+
+### Best Practices & Tips
+
+- **Use explicit type IDs:** Ensure each class registered has a unique, descriptive type ID to avoid collisions and improve readability.
+- **Employ lazy registration for large projects:** Defer imports of rarely used types to reduce startup time and memory usage.
+- **Leverage `dict_constructor` for complex types:** If a class requires special construction logic, register a factory method to be invoked during conversion.
+- **Be mindful of recursive data:** When dealing with deeply nested dictionaries, anticipate recursion performance impacts and test accordingly.
+
+---
+
+### Troubleshooting Common Issues
+
+- **Type ID not found:** Attempting to create or convert a type ID that is not registered triggers an error. Verify registration and spelling.
+- **LazyType import failures:** If lazy registration points to an incorrect module or class name, import errors arise during creation. Confirm fully qualified names.
+- **Constructor signature mismatch:** Registered classes should generally use keyword-only constructor arguments to work seamlessly with dictionary conversion.
+
+---
+
+### Next Steps
+
+To deepen your understanding and practical application:
+
+- Explore the **Core Concepts & Terminology** page to solidify foundational terms.
+- Visit **Key Features at a Glance** for hands-on insights into factory usage.
+- Get started quickly by following the **Getting Started guides** that build on this architecture.
+
+
+---
+
+This architecture overview connects the dots between *Dessine-moi*'s concepts and real usage, arming you with clarity to apply its dynamic factory pattern with confidence.
+
+---

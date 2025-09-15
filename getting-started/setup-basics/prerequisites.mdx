@@ -1,0 +1,184 @@
+---
+title: "Prerequisites and System Requirements"
+description: "Outlines the required Python version, supported operating systems, and any critical dependencies needed before installing Dessine-moi. Clarifies what users need to check or set up before proceeding."
+---
+
+# Prerequisites and System Requirements
+
+Preparing your development environment for *Dessine-moi* ensures a smooth installation and optimal usage experience. This page outlines the essential software versions, supported platforms, and dependencies you must have before proceeding.
+
+---
+
+## 1. Supported Python Versions
+
+*Dessine-moi* requires **Python 3.8 or higher**. It has been tested and is compatible up to Python 3.13, with ongoing support for the latest Python releases to leverage modern language features.
+
+### How to Check Your Python Version
+
+Open a terminal or command prompt and run:
+
+```bash
+python --version
+```
+
+This should output something like:
+
+```plaintext
+Python 3.8.10
+```
+
+If your version is below 3.8, please update Python before continuing.
+
+<Note>
+Python 3.7 and earlier are not supported and may cause installation errors or runtime failures.
+</Note>
+
+---
+
+## 2. Supported Operating Systems
+
+*Dessine-moi* is platform-independent and runs on all major operating systems with Python 3.8+ installed:
+
+- **Windows 10 and later**
+- **macOS 10.15 (Catalina) and later**
+- **Linux distributions** (e.g., Ubuntu, Fedora, Debian)
+
+<Info>
+Ensure your OS has Python installed correctly and environment variables set for easy access to the python interpreter.
+</Info>
+
+---
+
+## 3. Required Dependencies
+
+### Primary Dependency: attrs Library
+
+*Dessine-moi* relies on [`attrs`](https://www.attrs.org/en/stable/) — a powerful Python package for concise class definitions and automatic attribute management.
+
+### Installation
+
+This package will be installed automatically when you install *Dessine-moi* via pip or conda.
+
+Manually, you can install it by running:
+
+```bash
+python -m pip install attrs
+```
+
+or with conda:
+
+```bash
+conda install -c conda-forge attrs
+```
+
+<Check>
+You can verify installation by running the following in Python:
+
+```python
+import attrs
+print(attrs.__version__)
+```
+
+If no error occurs and a version string appears, `attrs` is installed correctly.
+</Check>
+
+---
+
+## 4. Optional Tools for Development
+
+If you plan to contribute or develop *Dessine-moi* itself, consider installing the following:
+
+- **`uv` Package Manager**: Used for managing tasks and dependencies.
+- **`pre-commit` Git Hook Manager**: Helps maintain code quality by running scripts before commits.
+
+These can be installed using:
+
+```bash
+python -m pip install uv pre-commit
+```
+
+Activate pre-commit hooks in your repository:
+
+```bash
+pre-commit install
+```
+
+<Info>
+These tools are not required for using *Dessine-moi* but are important for development workflows.
+</Info>
+
+---
+
+## 5. Network and Access Requirements
+
+Since *Dessine-moi* is a Python library installed locally, it does not require network access after installation.
+
+However, you will need internet access during installation to fetch packages from PyPI or conda-forge repositories.
+
+<Warning>
+If you work behind a corporate proxy or firewall, ensure your package manager (pip or conda) is properly configured to access external repositories.
+</Warning>
+
+---
+
+## 6. Summary Checklist Before Installing
+
+<Steps>
+<Step title="Check Python Version">
+Ensure you have Python 3.8 or newer installed.
+</Step>
+<Step title="Verify Operating System Compatibility">
+Use Windows 10+, macOS Catalina+, or a recent Linux distribution.
+</Step>
+<Step title="Confirm Dependency Availability">
+Check that the `attrs` package can be installed or is installed.
+</Step>
+<Step title="Prepare Development Tools (Optional)">
+Install `uv` and `pre-commit` if developing the library.
+</Step>
+</Steps>
+
+---
+
+## 7. Troubleshooting Common Prerequisite Issues
+
+<AccordionGroup title="Common Problems and Solutions">
+<Accordion title="Python Version Issues">
+- **Problem:** `python --version` shows version less than 3.8.
+- **Solution:** Download and install the latest Python from the official website https://python.org or use your OS package manager.
+</Accordion>
+<Accordion title="Dependency Installation Fails">
+- **Problem:** `pip install attrs` fails due to network or permission errors.
+- **Solution:** 
+  - Check network connectivity.
+  - Use `pip install --user attrs` to install locally if permission denied.
+  - Configure proxy settings if behind a firewall.
+</Accordion>
+<Accordion title="Environment Conflicts">
+- **Problem:** Multiple Python versions cause confusion.
+- **Solution:** Use virtual environments (`venv` or `conda env`) to isolate project dependencies and ensure correct Python interpreter usage.
+</Accordion>
+</AccordionGroup>
+
+---
+
+## 8. Where to Go Next
+
+With your system ready:
+
+- Proceed to the [Installation Instructions](/getting-started/setup-basics/installation) page to install *Dessine-moi*.
+- Review the [Usage Guide](/usage) for how to create your first factory and register types.
+- If you encounter problems, the [Troubleshooting](/getting-started/first-usage/troubleshooting) section offers targeted help.
+
+<Tip>
+Properly setting up your environment prevents many common issues and speeds up your productivity with *Dessine-moi*.
+</Tip>
+
+---
+
+For detailed developer environment prerequisites, see the [Contributing](/contributing.md) guide.
+
+
+---
+
+**End of Prerequisites and System Requirements**

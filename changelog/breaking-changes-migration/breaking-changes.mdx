@@ -1,0 +1,118 @@
+---
+title: "Breaking Changes and Deprecations"
+description: "Clearly surfaces any changes that may impact backward compatibility. Highlights deprecated APIs, removed features, and offers context on why changes were made, so users can plan accordingly."
+---
+
+# Breaking Changes and Deprecations
+
+This page highlights critical backward compatibility changes and deprecated features in *Dessine-moi*. It helps you understand which APIs or behaviors have been modified or removed, why these changes were made, and how to adapt your projects accordingly. Staying informed of breaking changes is essential to ensure your workflows continue without interruption and you harness the latest improvements safely.
+
+---
+
+## Understanding Breaking Changes
+
+Breaking changes refer to modifications in the API or behavior of *Dessine-moi* that are not backward compatible. These require users to update their code to remain functional with newer versions.
+
+Users typically encounter breaking changes when upgrading major or some minor versions. It’s crucial to read release notes and migration guides before updating.
+
+### Common Types of Breaking Changes
+
+- Removal or renaming of public APIs (methods, classes, parameters)
+- Changes in function/method signatures
+- Modified behavior of existing features that affect user expectations
+- Changed or dropped support for Python versions
+- Altered default values or configurations affecting object creation
+
+<Tip>
+Always review breaking changes before upgrading. Running your test suite against the new version in a controlled environment can catch issues early.
+</Tip>
+
+## Deprecation Notices
+
+Deprecated features are APIs or patterns marked for removal in future releases. They continue to work for now but produce warnings or documentation notes encouraging users to migrate.
+
+Deprecation helps in:
+
+- Gradually phasing out outdated or unsafe APIs
+- Allowing users to plan upgrades proactively
+- Cleaning the codebase for better maintainability
+
+<Warning>
+Do not ignore deprecation warnings. Address them early to avoid urgent refactoring when these features are removed.
+</Warning>
+
+## Major Breaking Changes and Deprecations Overview
+
+This section summarizes key breaking changes and deprecations from recent releases relevant to the Factory and type registration workflows—core to *Dessine-moi*'s functionality.
+
+### Python Version Support Adjustments
+
+- Support for Python 3.7 has been dropped since version 23.1.0. You must use Python 3.8 or newer to run *Dessine-moi*.
+- Added support for Python 3.12 and 3.13 in recent releases, reflecting ongoing modern Python compatibility.
+
+### Factory Registration API Changes
+
+- The `Factory.register()` method renamed its parameter `allow_id_overwrite` to `overwrite_id` in version 22.2.0 to improve clarity and consistency. Update your calls accordingly.
+- Lazy registration feature enhancements require adjustments if you inherit or use string-based lazy types.
+
+### Dependency and Project Management Changes
+
+- Upgrades in project tooling such as switching from Poetry to PDM and later from PDM to Rye affect development workflows. These do not impact user APIs but are important if you contribute or build from source.
+
+### Removed Features and Deprecated Patterns
+
+- Removal of Copier templates and Conda development environment support to focus maintenance efforts on the core library.
+- Dropping of Nox for testing replaced by modern tooling aligned with Rye and uv.
+
+## How to Prepare and Migrate
+
+Follow these best practices to smoothly handle breaking changes and deprecations:
+
+<Steps>
+<Step title="Review Release Notes and Migration Guides">
+Always start with reading the latest [Release Notes](../release_notes.md) and any migration documentation linked there. These documents explicitly call out breaking changes and provide recommended code updates.
+</Step>
+<Step title="Update Python Environment">
+Verify your Python interpreter version is supported. Upgrade to Python 3.8+ if needed to maintain compatibility with *Dessine-moi*.
+</Step>
+<Step title="Adjust Factory Registration Calls">
+Rename parameters like `allow_id_overwrite` to `overwrite_id` in your calls to `Factory.register()`. This ensures your code aligns with the current API.
+</Step>
+<Step title="Test Your Code Thoroughly">
+Run your unit and integration tests with the updated library version to find any breakages early. Focus especially on object creation and dictionary conversion workflows.
+</Step>
+<Step title="Plan to Replace Deprecated Features">
+If you rely on deprecated APIs or features, replace them proactively following guidance in deprecation warnings and documentation.
+</Step>
+</Steps>
+
+## Common Pitfalls and Troubleshooting
+
+<AccordionGroup title="Troubleshooting Breaking Changes">
+<Accordion title="Factory.register() parameter rename causes errors">
+If you see `TypeError` about unexpected keyword arguments when calling `register()`, verify you use `overwrite_id=` instead of `allow_id_overwrite=`.
+
+Search your codebase for the old parameter and update it.
+</Accordion>
+<Accordion title="Python version incompatibility errors">
+Errors such as `SyntaxError` or ImportError might indicate an unsupported Python version. Confirm your Python environment is 3.8 or later.
+
+Use `python --version` to check.
+</Accordion>
+<Accordion title="Warnings about deprecated features during runtime">
+You might see warnings about deprecated APIs when running your code.
+
+Review the warning messages to identify affected code lines, then consult the documentation for new recommended APIs.
+</Accordion>
+</AccordionGroup>
+
+## Additional Resources
+
+- [Release Notes](../release_notes.md): Detailed version-by-version announcements and highlights
+- [Migration Guides](../migration-guides.md): Step-by-step instructions for major updates
+- [Factory API Reference](../../api-reference/core-api/factory-class.md): Up-to-date API documentation
+- [Registering Types Guide](../../guides/getting-started/registering-types.md): How to customize object creation and registrations
+
+---
+
+Maintaining awareness of breaking changes and deprecations empowers you to keep your projects robust and current with *Dessine-moi*. This page will evolve with upcoming releases to keep you informed and prepared.
