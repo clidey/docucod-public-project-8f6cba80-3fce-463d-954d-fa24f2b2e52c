@@ -1,0 +1,233 @@
+---
+title: "Customizing the Factory"
+description: "Reference for modifying and extending the default factory logic to fit unique use cases. Outlines key extension points, illustrates customization with code snippets, and suggests strategies for integrating factory creation into varied codebases."
+---
+
+# Customizing the Factory
+
+Reference for modifying and extending the default factory logic to fit unique use cases. This guide outlines key extension points within the factory system, illustrates customization through practical code snippets, and suggests strategies for integrating factory creation and behavior into diverse Python codebases.
+
+---
+
+## Introduction
+
+The `Factory` class in *Dessine-moi* offers a solid, general-purpose implementation of the factory pattern to dynamically create Python objects from registrations and dictionary data. However, each project often has its own unique data structures, creation flows, or integration constraints that require adapting or extending the factory’s default behavior.
+
+This page empowers you to take full control of the factory creation process. You will learn how to:
+
+- Extend or replace the factory’s core methods to accommodate custom object creation logic.
+- Customize dictionary-to-object conversion by overriding key points.
+- Leverage *Dessine-moi*’s existing mechanisms like `dict_constructor` and lazy types.
+- Integrate factory creation into your architecture with fine-tuned control.
+
+---
+
+## Why Customize the Factory?
+
+While the default `Factory` implementation covers the majority of use cases — registering types, supporting aliases, converting dictionaries keyed by 'type' — your application may:
+
+- Require specialized parsing or preprocessing of input data before object creation.
+- Need to support complex constructor calls not limited to keyword-only args.
+- Want to customize error reporting or validation steps.
+- Integrate with third-party libraries or different object lifecycle management.
+- Use lazy loading differently or inject dependencies dynamically.
+
+Customizing the factory grants you the flexibility to meet these requirements while keeping the powerful registration and creation patterns intact.
+
+---
+
+## Key Extension Points
+
+### 1. Subclassing `Factory`
+
+The most straightforward customization is to subclass `dessinemoi.Factory`. This lets you override core methods such as:
+
+- `convert(self, value: Any, *, allowed_cls: type | tuple[type, ...] | None = None) -> Any` — Customize how dictionaries are converted into registered class instances.
+- `create(self, type_id: str, *, args: tuple = (), kwargs: dict | None = None, construct: str | None = None, allowed_cls: type | tuple[type, ...] | None = None) -> Any` — Override the instantiation logic for any specific type id.
+
+This design keeps your custom logic encapsulated while fully compatible with existing registrations and aliases.
+
+#### Example: Custom convert to allow list input
+
+```python
+from dessinemoi import Factory
+
+class CustomFactory(Factory):
+    def convert(self, value, *, allowed_cls=None):
+        if isinstance(value, list):
+            # Instead of rejecting, convert each element recursively
+            return [self.convert(v, allowed_cls=allowed_cls) for v in value]
+        return super().convert(value, allowed_cls=allowed_cls)
+
+factory = CustomFactory()
+```
+
+---
+
+### 2. Customizing Object Creation with `create`
+
+Use `create()` to control how objects for a registered `type_id` are instantiated. This includes:
+
+- Using specialized constructors (via `construct` argument).
+- Validating or transforming constructor arguments (`args`, `kwargs`).
+- Restricting creation to specific allowed classes.
+
+#### Example: Enforce required kwargs
+
+```python
+class ValidatingFactory(Factory):
+    def create(self, type_id, *, args=(), kwargs=None, construct=None, allowed_cls=None):
+        kwargs = kwargs or {}
+        if 'required_field' not in kwargs:
+            raise ValueError(f"Missing 'required_field' for {type_id}")
+        return super().create(type_id, args=args, kwargs=kwargs, construct=construct, allowed_cls=allowed_cls)
+
+factory = ValidatingFactory()
+```
+
+---
+
+### 3. Supporting Custom Dict Constructors
+
+When registering a class, you can associate a class method constructor by specifying the `dict_constructor` parameter.
+
+This method is called during dictionary conversion instead of direct constructor.
+
+```python
+@attrs.define
+class Sheep:
+    wool: str
+
+    @classmethod
+    def merino(cls):
+        return cls(wool="lots")
+
+factory.register(Sheep, type_id='sheep', dict_constructor='merino')
+
+# Now dict conversion uses the merino constructor
+obj = factory.convert({'type': 'sheep'})  # Sheep(wool='lots')
+```
+
+This mechanism is essential for projects needing non-standard initialization logic.
+
+---
+
+### 4. Lazy Type Registration and Loading
+
+For situations where importing a class upfront is undesirable or expensive, lazy registration delays import until creation.
+
+Register using fully qualified string names to enable lazy loading:
+
+```python
+factory.register('datetime.datetime', type_id='datetime')
+# No immediate import of datetime
+
+dt_obj = factory.create('datetime', args=(2024, 6, 1))  # lazy import triggers here
+```
+
+You can also register explicit `LazyType` instances for fine-grained control.
+
+---
+
+## Strategies for Integration
+
+### Modular Factory Instances
+
+Create specialized factory subclasses per application module or domain, each tailored with custom logic appropriate per context.
+
+This promotes separation of concerns and easier scaling.
+
+### Factory Wrappers
+
+Wrap factory calls within helper functions or service layers to inject additional behaviors such as logging, metrics, or caching without subclassing.
+
+### Combining with Dependency Injection
+
+Extend the factory to inject dependencies or configuration objects during creation by overriding `create()`.
+
+This supports integration with larger application frameworks.
+
+### Supporting Multiple Constructor Paths
+
+Use the `construct` argument to select alternative constructors defined as class methods, allowing dynamic creation strategies based on input data.
+
+### Handling Complex Data Structures
+
+Override `convert()` to implement recursive conversion of nested containers like lists or custom mappings.
+
+---
+
+## Practical Example: A Factory with Validation and List Support
+
+```python
+from dessinemoi import Factory
+import attrs
+
+class ValidatedFactory(Factory):
+    def convert(self, value, *, allowed_cls=None):
+        if isinstance(value, list):
+            return [self.convert(v, allowed_cls=allowed_cls) for v in value]
+        return super().convert(value, allowed_cls=allowed_cls)
+
+    def create(self, type_id, *, args=(), kwargs=None, construct=None, allowed_cls=None):
+        kwargs = kwargs or {}
+        if 'id' not in kwargs:
+            raise ValueError(f"'id' field is required for type '{type_id}'")
+        return super().create(type_id, args=args, kwargs=kwargs, construct=construct, allowed_cls=allowed_cls)
+
+factory = ValidatedFactory()
+
+@attrs.define
+class Animal:
+    id: int
+    name: str
+
+factory.register(Animal, type_id='animal')
+
+# Usage
+animals_data = [
+    {'type': 'animal', 'id': 1, 'name': 'Dolly'},
+    {'type': 'animal', 'id': 2, 'name': 'Shaun'},
+]
+
+animals = factory.convert(animals_data)
+```
+
+---
+
+## Troubleshooting Common Pitfalls
+
+<AccordionGroup title="Common Issues When Customizing the Factory">
+<Accordion title="Error: Missing required parameter during create()">
+Make sure that when overriding `create()`, all required arguments are properly forwarded to the base implementation to avoid unexpected failures.
+</Accordion>
+<Accordion title="LazyType not resolving correctly">
+Verify that the registered string path is fully qualified and correct. Remember lazy loading only occurs at creation time.
+</Accordion>
+<Accordion title="Custom dict_constructor not called">
+Ensure the `dict_constructor` name matches an existing class method and that the factory registration includes it.
+</Accordion>
+</AccordionGroup>
+
+---
+
+## Additional Resources
+
+- See the [Factory Class API](../api-reference/factory-core-api/factory-class) for complete method signatures.
+- Learn about [Type Registration](../api-reference/factory-core-api/type-registration) for advanced registration patterns.
+- Explore dictionary-driven [Object Creation](../api-reference/factory-core-api/object-creation-from-dict) patterns.
+- Understand integration with [attrs-Compatible Converters](../api-reference/advanced-and-integration/attrs-converters).
+
+---
+
+## Summary
+Customizing the `Factory` in *Dessine-moi* invites you to adapt its flexible and powerful creation logic to your specific application needs. Whether by subclassing to override `convert()` or `create()`, using `dict_constructor` for custom init paths, or leveraging lazy loading, you gain full control over dynamic object creation. Use these extension points thoughtfully to craft seamless integrations, enforce data integrity, and build maintainable, scalable dynamic object systems.
+
+<Check>
+You are now equipped to modify and extend factory behavior confidently, integrate customized creation flows, and avoid common pitfalls.
+</Check>
+
+---
+
+## Source
+<Source url="https://github.com/rayference/dessinemoi" branch="main" paths={[{"path": "src/dessinemoi/__init__.py", "range": "1-23"},{"path": "docs/usage.rst", "range": "25-130"}]} />
