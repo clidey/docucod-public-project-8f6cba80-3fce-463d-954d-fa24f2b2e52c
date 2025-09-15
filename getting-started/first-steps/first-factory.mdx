@@ -1,0 +1,233 @@
+---
+title: "Your First Factory: Usage Example"
+description: "Demonstrates the creation and use of a Factory object, including how to register types and build objects from dictionaries. Offers a ready-to-copy minimal working example for immediate feedback."
+---
+
+# Your First Factory: Usage Example
+
+This guide walks you through creating and using a `Factory` object in *Dessine-moi*. You will learn how to register Python types (classes) with the factory, instantiate those types by creating objects from dictionaries, and use convenient features like aliases and custom constructors. A minimal working example is provided so you can quickly get hands-on feedback.
+
+---
+
+## 1. Create a Factory Instance
+
+Start by importing the `Factory` class from the `dessinemoi` package and creating a fresh factory. This factory maintains a registry mapping type identifiers to Python classes.
+
+```python
+import dessinemoi
+
+factory = dessinemoi.Factory()
+print(factory)  # Outputs: Factory(registry={})
+```
+
+At this point, the factory has an empty registry and is ready to accept types.
+
+---
+
+## 2. Define and Register Your Types
+
+Define Python classes representing the objects you want to create with the factory. Using the `attrs` library provides concise class definitions, but it's optional.
+
+```python
+import attrs
+
+@attrs.define
+class Sheep:
+    wool: str = "some"
+```
+
+### Register the Class
+
+You register the `Sheep` class with the factory by providing a unique string `type_id`:
+
+```python
+factory.register(Sheep, type_id="sheep")
+```
+
+Now the factory knows how to create `Sheep` objects when asked for a type ID of `"sheep"`.
+
+### Register Using Decorator Style
+
+Alternatively, register classes at declaration time using the `@factory.register` decorator. If your class defines a `_TYPE_ID` attribute, the factory will use it automatically:
+
+```python
+@factory.register
+@attrs.define
+class Lamb(Sheep):
+    _TYPE_ID = "lamb"
+```
+
+This registers `Lamb` using its `_TYPE_ID` value, adding it to the factory registry.
+
+### Using Aliases for a Type
+
+Sometimes you want two or more type IDs to refer to the same class. You can add aliases:
+
+```python
+factory.alias("sheep", "mouton")
+```
+
+Now both `"sheep"` and `"mouton"` create instances of the `Sheep` class.
+
+Aliases can also be defined when registering:
+
+```python
+factory.register(Sheep, type_id="sheep", aliases=["mouton"])
+```
+
+---
+
+## 3. Instantiate Objects Using the Factory
+
+You can create objects by calling `factory.create(type_id, args, kwargs)`, passing constructor arguments as needed.
+
+```python
+merino = factory.create("sheep", kwargs={"wool": "lots"})
+print(merino)  # Output: Sheep(wool='lots')
+```
+
+If the constructor requires positional arguments, supply them as a tuple `args`:
+
+```python
+@factory.register
+@attrs.define
+class Sheep:
+    age: int
+    name: str
+
+sheep_instance = factory.create("sheep", args=(5, "Dolly"))
+print(sheep_instance)  # Sheep(age=5, name='Dolly')
+```
+
+### Restrict Allowed Types
+
+To restrict which types can be created, use `allowed_cls` (can be a type or tuple of types):
+
+```python
+factory.create("sheep", allowed_cls=Lamb)  # Raises TypeError if Sheep is not a Lamb subtype
+```
+
+---
+
+## 4. Use Custom Class Method Constructors
+
+Define special class methods to create objects with predefined parameters:
+
+```python
+@attrs.define
+class Sheep:
+    wool: str
+
+    @classmethod
+    def unsheavable(cls):
+        return cls(wool="none")
+
+factory.register(Sheep, type_id="sheep", dict_constructor="unsheavable")
+```
+
+Use this method during instantiation:
+
+```python
+unsheavable_sheep = factory.create("sheep", construct="unsheavable")
+print(unsheavable_sheep)  # Sheep(wool='none')
+```
+
+---
+
+## 5. Convert Dictionaries to Objects
+
+*Dessine-moi* excels at creating objects from dictionaries that specify a `type` ID.
+
+```python
+sheep_dict = {"type": "sheep", "wool": "plenty"}
+sheep_obj = factory.convert(sheep_dict)
+print(sheep_obj)  # Sheep(wool='plenty')
+```
+
+- If the input is not a dictionary, it is returned unchanged.
+- The factory extracts the `type` key from the dictionary to determine the class.
+- You can also restrict conversions with `allowed_cls`.
+
+### Example:
+
+```python
+factory.convert({"type": "lamb"}, allowed_cls=Lamb)  # Creates a Lamb instance
+```
+
+---
+
+## 6. Handling Lazy Registration
+
+You can register a type by string representing its full module path without importing it upfront:
+
+```python
+factory.register("datetime.datetime", type_id="datetime")
+```
+
+The actual import occurs upon the first creation of an instance, improving start-up times and dependency management.
+
+---
+
+## 7. Minimal Complete Example to Try Now
+
+Copy-paste this code to immediately see your first factory in action:
+
+```python
+import attrs
+import dessinemoi
+
+# 1. Create factory
+factory = dessinemoi.Factory()
+
+# 2. Define and register classes
+@factory.register
+@attrs.define
+class Sheep:
+    wool: str = "some"
+
+@factory.register
+@attrs.define
+class Lamb(Sheep):
+    _TYPE_ID = "lamb"
+
+# 3. Create objects by type id
+sheep_instance = factory.create("sheep", kwargs={"wool": "plenty"})
+lamb_instance = factory.create("lamb")
+
+print(sheep_instance)  # Sheep(wool='plenty')
+print(lamb_instance)   # Lamb(wool='some')
+
+# 4. Convert from dict
+obj_from_dict = factory.convert({"type": "sheep", "wool": "lots"})
+print(obj_from_dict)  # Sheep(wool='lots')
+```
+
+<Check>
+Run this script to confirm your factory setup is correct and ready for more complex workflows.
+</Check>
+
+---
+
+## Troubleshooting Tips
+
+- **Type ID not found**: Verify type IDs are registered before creation or conversion.
+- **Duplicate type ID registration**: Use `overwrite_id=True` cautiously or ensure unique IDs.
+- **Constructor issues**: Confirm class constructors match the provided args/kwargs during creation.
+- **Alias conflicts**: Ensure aliases do not overwrite existing registered IDs without `overwrite_id`.
+
+---
+
+## Next Steps
+
+- Explore advanced factory configurations in [Configuration and Setup](../../getting-started/setup/configuration).
+- Learn how to convert deeply nested dictionaries to objects in [Creating Objects from Dictionaries](../../guides/getting-started/dictionary-object-creation).
+- Understand error handling and customization in [Customizing and Extending Your Factory](../../guides/practical-patterns/customizing-factories).
+
+Use the factory to build tailored object hierarchies dynamically and effortlessly from configuration data, JSON, or any nested dictionary input.
+
+---
+
+For more details, see the full [Factory API reference](../../../api-reference/factory-core-api/factory-class).
+
+
+---
