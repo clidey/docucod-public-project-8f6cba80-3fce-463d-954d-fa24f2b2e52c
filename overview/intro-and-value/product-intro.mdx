@@ -1,0 +1,87 @@
+---
+title: "What is Dessine-moi?"
+description: "A concise explanation of Dessine-moi as a simple, intuitive Python factory for dynamic object creation from dictionaries. This page summarizes its philosophy, core value, and high-level business benefits."
+---
+
+# What is Dessine-moi?
+
+## A Simple, Intuitive Python Factory for Dynamic Object Creation
+
+Imagine you have a complicated nested dictionary or JSON document and you want to quickly turn it into an actual Python object tree. This is where *Dessine-moi* shines. It provides a clean and minimalistic factory pattern implementation that dynamically creates Python objects based on dictionary data.
+
+### Why You Should Care
+
+- **Dynamic object creation from dictionaries:** Gone are the days of manually parsing nested data. *Dessine-moi* lets you register types upfront and then create objects on the fly simply by using dictionary definitions.
+- **Seamless integration with Python types:** Whether you use plain classes or *attrs*-decorated ones, the factory works with your existing code.
+- **Enhanced flexibility:** Choose from eager or lazy type registration and easily alias types for convenience.
+- **Tailored for real-world needs:** Designed originally to parse complex JSON into meaningful Python objects, making your data workflows efficient.
+
+### What is Dessine-moi?
+
+*Dessine-moi* is a Python library that implements the factory design pattern with a focus on dynamic creation of objects based on dictionary inputs. Instead of hardcoding class instantiations, it lets you define a factory once, register your types, and then create instances from dicts anytime, anywhere.
+
+#### Core Philosophy
+
+The guiding principle of *Dessine-moi* is simplicity combined with powerful flexibility.
+
+- **Simple:** Minimal ceremony to register types and produce instances.
+- **Intuitive:** Dictionary keys map naturally to constructor arguments.
+- **Dynamic:** Supports lazy imports to defer heavy dependencies until needed.
+
+With this approach, it solves a common problem seen in applications dealing with external JSON or config-based data sources that define object structures.
+
+### How Dessine-moi Works at a High Level
+
+- You create a **Factory** object to act as a registry for Python types.
+- You **register** Python classes with the factory, associating them with string identifiers.
+- Once registered, you can **create** instances by type ID, passing constructor arguments.
+- You can convert dictionaries containing a `type` key into the appropriate Python objects.
+- Support for lazy registration means you can register a type by its fully qualified name (as a string), delaying import until instantiation.
+
+### Key Value Propositions
+
+- **Rapid object instantiation:** Instantiate complex object hierarchies with minimal code.
+- **Dictionary-driven workflows:** Perfect for JSON deserialization and config-based systems.
+- **Flexible registration:** Decorator and method-based registration with aliases.
+- **Supports advanced construction:** Call class method constructors transparently.
+- **Lazy import support:** Reduce startup overhead by deferring type imports.
+
+### Example Scenario
+
+Suppose you receive a JSON payload describing animals on a farm, with different species and attributes. Instead of writing custom parsing for each species, you define a few Python classes (`Sheep`, `Ram`, `Lamb`), register them with your factory, and then call `convert()` passing the JSON.
+
+This converts the nested dictionary automatically into a rich set of Python objects ready for further processing, analytics, or operations.
+
+### Summary
+
+*Dessine-moi* offers a pragmatic and elegant way to build Python objects dynamically from dictionaries, turning opaque data into actionable code structures with a few lines. It is ideal for projects needing lightweight but powerful dynamic object creation, especially those working with JSON or similar data sources.
+
+---
+
+## Practical Tips for Getting Started
+
+- Begin by instantiating a `Factory`.
+- Register your classes, ideally using the decorator syntax.
+- Use `.create()` to instantiate objects by their IDs with arguments.
+- Convert dictionaries with `.convert()`, providing a `type` key.
+- Utilize aliases to handle synonymous type identifiers.
+- Consider lazy registration to defer imports of heavy dependencies.
+
+## Common Pitfalls to Avoid
+
+- Forgetting to register a type before creating or converting raises errors.
+- Using dictionary entries without a `type` key will not trigger conversion.
+- Overwriting type IDs without explicit permission (`overwrite_id=True`) is disallowed.
+- Lazy type strings must be fully qualified module paths.
+
+For detailed instructions on usage patterns, refer to the [Usage Guide](/guides/getting-started/quick-start-factory).
+
+## Next Steps
+
+Explore these areas to deepen your understanding of *Dessine-moi*:
+
+- [Key Features at a Glance](/overview/intro-and-value/main-features): See what the factory can do step-by-step.
+- [Who Should Use Dessine-moi?](/overview/intro-and-value/target-audience): Learn if this tool fits your project needs.
+- [Core Concepts & Terminology](/overview/core-concepts-and-architecture/core-concepts): Understand the foundational concepts behind the factory pattern here.
+
+Use *Dessine-moi* to streamline your data-driven object creations and simplify your Python development workflows with ease and clarity.
