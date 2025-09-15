@@ -1,0 +1,190 @@
+---
+title: "Performance Optimization & Troubleshooting"
+description: "Techniques for maximizing performance in high-throughput scenarios, and resolving common issues or gotchas encountered when using Dessine-moi. Provides diagnostics, profiling guidance, and advice on optimizing conversions."
+---
+
+# Performance Optimization & Troubleshooting
+
+Efficiently using *Dessine-moi* in high-throughput scenarios demands awareness of performance considerations and troubleshooting practices. This guide empowers you to maximize conversion speed, diagnose common pitfalls, and overcome typical issues encountered during dictionary-to-object workflows.
+
+---
+
+## 1. Workflow Overview
+
+- **Task Description**: Equip yourself with practical tips and techniques to optimize *Dessine-moi*'s performance and swiftly resolve common errors or bottlenecks during dynamic Python object creation from nested dictionaries.
+- **Prerequisites**: Basic familiarity with the *Dessine-moi* Factory; Python environment set up with *Dessine-moi* installed; registered types and dictionary data prepared for conversion.
+- **Expected Outcome**: Your applications will handle large-scale or frequent dictionary-to-object conversions more efficiently, and you will be capable of identifying and fixing frequent problems.
+- **Time Estimate**: 15-30 minutes to incorporate optimization techniques and troubleshooting processes.
+- **Difficulty Level**: Intermediate
+
+---
+
+## 2. Performance Optimization Techniques
+
+### 2.1 Streamline Factory Registrations
+
+- **Register only necessary types:** Keep your factory registry concise. Avoid registering unnecessary types which increase lookup overhead.
+- **Use lazy registration for rarely used types:** Defer importing types until instantiation by registering using fully qualified strings or `LazyType`. This reduces initial import costs.
+
+```python
+factory.register('module.YourClass', type_id='your_class')  # Lazy registration
+```
+
+
+### 2.2 Choose Appropriate Constructors
+
+- When registering types, specify a lightweight or default dict constructor to avoid heavy initializations.
+- Use simple classmethod constructors (via `dict_constructor` argument) when possible, as these can tailor instantiation efficiency.
+
+```python
+factory.register(YourClass, type_id='your_class', dict_constructor='fast_init')
+```
+
+
+### 2.3 Minimize Conversion Overhead
+
+- **Avoid unnecessary conversions:** Pass already-constructed objects through the factory’s convert method to bypass redundant transformations.
+- **Use `allowed_cls` parameter:** Restrict conversions to expected class types to prevent expensive runtime type checking across broad class hierarchies.
+
+### 2.4 Profile and Monitor
+
+- Use Python profiling tools (`cProfile`, `timeit`) to identify bottlenecks in conversion workflows.
+- Focus on the time spent in `Factory.convert` and `Factory.create` calls.
+
+```python
+import cProfile
+
+profiler = cProfile.Profile()
+profiler.enable()
+# Your conversion calls
+profiler.disable()
+profiler.print_stats(sort='cumtime')
+```
+
+
+### 2.5 Batch Processing
+
+- For scenarios converting large lists of dictionaries, batch convert in loops and reuse the same factory instance to leverage cached type lookups.
+
+
+## 3. Troubleshooting Common Issues
+
+### 3.1 Import Errors and LazyType Issues
+
+- **Problem:** LazyType fails to import the target class.
+- **Solution:** Ensure fully qualified paths are correct. Use absolute module paths and verify module availability in the environment.
+
+```python
+factory.register('your_package.your_module.YourClass', type_id='your_class')
+```
+
+- Check for circular imports or missing dependencies causing import failures.
+
+### 3.2 Registry Conflicts
+
+- **Problem:** Registration fails due to duplicate type IDs.
+- **Solution:** Use `overwrite_id=True` explicitly to replace existing entries if intended.
+
+### 3.3 Conversion Errors
+
+- **Problem:** Conversion raises `ValueError` because the `type` key is missing or unregistered.
+- **Solution:** Ensure your input dictionary has a valid `type` key matching a registered factory ID.
+
+```python
+obj = factory.convert({'type': 'sheep', 'wool': 'thick'})  # Correct
+```
+
+- If using nested dictionary conversions, confirm nested types are registered and input dictionaries include correct `type` keys.
+
+### 3.4 Type Restrictions Failures
+
+- **Problem:** Passing an `allowed_cls` restricts conversions unexpectedly.
+- **Solution:** Verify that the `allowed_cls` is more general or exactly matches the target class hierarchy. Remember, subtypes are allowed if `allowed_cls` is a base class.
+
+### 3.5 Handling Non-Dictionary Inputs
+
+- *Dessine-moi*'s convert method returns non-dict values unchanged; ensure your inputs are correctly formatted dictionaries when you expect conversion.
+
+---
+
+## 4. Practical Tips & Best Practices
+
+- Use one persistent `Factory` instance rather than creating multiple instances to benefit from caching.
+- Register aliases only when necessary to avoid confusion and registry bloat.
+- When working with *attrs* classes, harmonize dict constructors with factory registration to improve instantiation speed.
+- Consider writing unit tests for your factory registrations and conversions to catch misconfigurations early.
+
+<Tip>
+In a performance-critical environment, always profile before optimizing to avoid premature or misguided changes.
+</Tip>
+
+<Tip>
+Leverage the `construct` parameter to select lightweight construction methods where available.
+</Tip>
+
+---
+
+## 5. Example: Profiling a Conversion Workflow
+
+```python
+import timeit
+from dessinemoi import Factory
+import attrs
+
+factory = Factory()
+
+@attrs.define
+class Sheep:
+    _TYPE_ID = 'sheep'
+    wool: str = 'normal'
+
+factory.register(Sheep)
+
+dict_data = {'type': 'sheep', 'wool': 'thick'}
+
+# Profile conversion
+result = timeit.timeit(lambda: factory.convert(dict_data), number=10000)
+print(f'Conversion of 10,000 sheep took {result:.2f} seconds')
+```
+
+Use this timing information to assess if dictionary conversions meet your performance budget.
+
+---
+
+## 6. Troubleshooting Diagnostic Checklist
+
+<AccordionGroup title="Common Problem Diagnosis">
+<Accordion title="Factory.create returns unexpected type or instance">
+- Confirm the `type_id` used in `create()` matches exactly a registered type.
+- Check for lazy type dereferencing issues.
+- Verify custom constructors via `construct` parameter.
+</Accordion>
+<Accordion title="Conversion raises ValueError on unknown type">
+- Ensure the input dictionary contains a `type` key.
+- Confirm the `type` value maps to a registered factory ID.
+- Check for spelling or casing mismatches.
+</Accordion>
+<Accordion title="LazyType fails to load class module">
+- Validate module and class name strings.
+- Confirm no import-time side effects or errors in the target module.
+- Check Python path and environment configuration.
+</Accordion>
+<Accordion title="Performance degradation during batch conversions">
+- Reuse Factory instance across batch.
+- Avoid unnecessary type registrations or registry clears.
+- Profile and optimize slow constructors or conversions.
+</Accordion>
+</AccordionGroup>
+
+---
+
+## 7. Next Steps & Related Content
+
+- Learn more about factory registration and aliasing in the [Registering Types and Building Object Trees](../guides/getting-started/registering-types.html) guide.
+- Build complex object trees from dictionaries with the [Creating Objects from Dictionaries](../guides/getting-started/dict-to-object.html) documentation.
+- Explore advanced customization of factory behavior in the [Customizing Factories for Complex Workflows](../guides/advanced-usage/customizing-factories.html) guide.
+- Review core components and architecture in the [Architecture Overview](../overview/architecture-integration/system-architecture.html) for deeper insight on internals.
+
+<Check>
+Following these optimization and troubleshooting methods ensures your use of *Dessine-moi* is robust, maintainable, and performant under demanding usage patterns.
+</Check>
